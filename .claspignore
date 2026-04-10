@@ -7,3 +7,6 @@ BACKUP.md
 scripts/**
 backups/**
 node_modules/**
+*.jpg
+*.jpeg
+*.png

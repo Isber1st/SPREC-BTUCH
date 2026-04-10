@@ -16,6 +16,7 @@ const MAX_ALIQ_PER_TUBE  = 9;
 //const MAX_COLLECTION_AGE_DAYS = 30;
 const CENTRIF_MIN_GT = 10;
 const CENTRIF_WARN_GT = 40;
+const FUTURE_TOLERANCE_MINUTES = 5;
 
 const HEAD_CASES = ['CodigoCaso','TiempoColeccionSangre','TiempoColeccionOrinaInit','Mes','nTubosEDTA','nTubosSERUM','nTubosURINE','Responsable','Creado'];
 const HEAD_DATA = ['Mes','Codigo muestra Noraybank','Codigo de entrada','A. Tipo de muestra','B. Tipo de contenedor primario','Tiempo de colección','D. Primera Centrifugación','E. Segunda Centrifugación','G.1 Tiempo de inicio de almacenamiento a largo plazo','Estado de control','(fecha digitación)','(obs digitación)','(revisor)','(fecha revisión)','(obs revisión)','(estado final)'];
@@ -62,8 +63,29 @@ function ensureLog(){
 function fmtLocal(d){ return d ? Utilities.formatDate(new Date(d), TZ, 'dd-MM-yy HH:mm') : ''; }
 function monthEs(d){ const M=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']; const x=new Date(d); return M[x.getMonth()]; }
 function minutesDiff_(a,b){ return (a-b)/(1000*60); }
+function isFutureBeyondTolerance_(dt, now){
+  return minutesDiff_(dt, now) > FUTURE_TOLERANCE_MINUTES;
+}
 function ok(d){ return ContentService.createTextOutput(JSON.stringify({ok:true,data:d})).setMimeType(ContentService.MimeType.JSON); }
 function err(m){ return ContentService.createTextOutput(JSON.stringify({ok:false,error:String(m)})).setMimeType(ContentService.MimeType.JSON); }
+function lastDataRowByColumns_(sh, columns){
+  const maxRows = sh.getMaxRows();
+  let last = 1;
+  columns.forEach(col=>{
+    if (!col) return;
+    const values = sh.getRange(1, col, maxRows, 1).getDisplayValues();
+    for (let i = values.length - 1; i >= 0; i--){
+      if (String(values[i][0] || '').trim() !== ''){
+        last = Math.max(last, i + 1);
+        break;
+      }
+    }
+  });
+  return last;
+}
+function nextDataRow_(sh, columns){
+  return lastDataRowByColumns_(sh, columns) + 1;
+}
 function respName_(email){
   const sh = SS.getSheetByName(SHEET_RESP); if(!sh) return email||'';
   const last = sh.getLastRow(); if (last<2) return email||'';
@@ -202,7 +224,7 @@ function createOrUpdateCase_(p){
   const tColU = (selURI) ? parseLocalISO_(p.collectionISO_orina) : null;
   function validateCol(dt,label){
     if(!dt || isNaN(dt.getTime())) throw new Error(`Falta o es inválido el tiempo de colección (${label}).`);
-    if(dt > now) throw new Error(`El tiempo de colección (${label}) no puede ser futuro.`);
+    if(isFutureBeyondTolerance_(dt, now)) throw new Error(`El tiempo de colección (${label}) no puede ser futuro.`);
     //if((now - dt) > MAX_COLLECTION_AGE_DAYS*24*60*60*1000) throw new Error(`El tiempo de colección (${label}) no puede tener más de $///{MAX_COLLECTION_AGE_DAYS} días.`);
   }
   if (selEDTA||selSER) validateCol(tColS,'sangre');
@@ -227,8 +249,9 @@ function createOrUpdateCase_(p){
     row[map.nTubosURINE-1]= (nU===null?0:nU);
     row[map.Responsable-1]= responsable;
     row[map.Creado-1] = new Date();
-    sh.getRange(sh.getLastRow()+1,1,1,HEAD_CASES.length).setValues([row]);
-    sh.getRange(sh.getLastRow(), map.CodigoCaso).setNumberFormat('@');
+    const targetRow = nextDataRow_(sh, [map.CodigoCaso]);
+    sh.getRange(targetRow,1,1,HEAD_CASES.length).setValues([row]);
+    sh.getRange(targetRow, map.CodigoCaso).setNumberFormat('@');
   } else {
     if (selEDTA||selSER){
       sh.getRange(q.row, map.TiempoColeccionSangre).setValue(tColS);
@@ -268,10 +291,10 @@ function saveUrineTimes_(p){
   Object.keys(tmap).forEach(k=>{
     const tn=Number(k); const dt=parseLocalISO_(tmap[k]);
     if(!Number.isInteger(tn)||tn<1||tn>nU) return;
-    if(!dt || isNaN(dt.getTime()) || dt>now) return;
+    if(!dt || isNaN(dt.getTime()) || isFutureBeyondTolerance_(dt, now)) return;
     ins.push([code, tn, dt]);
   });
-  if(ins.length) shU.getRange(shU.getLastRow()+1,1,ins.length,3).setValues(ins);
+  if(ins.length) shU.getRange(nextDataRow_(shU, [1,2,3]),1,ins.length,3).setValues(ins);
 
   return ok({saved:ins.length});
 }
@@ -296,11 +319,11 @@ function generateRows2_(p){
     const obs = p.notes||'';
     if (kind==='blood'){
       if(!d1ISO || !e1ISO || !g1SerISO) return err('D.1, E.1 y G.1 (EDTA/Serum) son obligatorios.');
-      if(d1ISO>now || e1ISO>now || g1SerISO>now) return err('Fechas de sangre no pueden ser futuras.');
+      if([d1ISO, e1ISO, g1SerISO].some(dt=>isFutureBeyondTolerance_(dt, now))) return err('Fechas de sangre no pueden ser futuras.');
       if(!(minutesDiff_(e1ISO,d1ISO) > CENTRIF_MIN_GT)) return err(`E.1 − D.1 debe ser > ${CENTRIF_MIN_GT} min.`);
     } else {
       if(!g1UriISO) return err('G.1 (Orina) es obligatorio.');
-      if(g1UriISO>now) return err('G.1 (Orina) no puede ser futuro.');
+      if(isFutureBeyondTolerance_(g1UriISO, now)) return err('G.1 (Orina) no puede ser futuro.');
     }
     const shC = ensureCases(); const mapC = headMap_(shC);
     const shD = ensureData();  const shU = ensureUrine();
@@ -383,12 +406,12 @@ function generateRows2_(p){
       }
     });
     if(!rowsOut.length) return err('No hay filas para generar.');
-    shD.getRange(shD.getLastRow()+1,1,rowsOut.length,rowsOut[0].length).setValues(rowsOut);
+    shD.getRange(nextDataRow_(shD, [2]),1,rowsOut.length,rowsOut[0].length).setValues(rowsOut);
     CacheService.getDocumentCache().remove('processed_types_v1');
     const envioId = makeEnvId_();
     const log = [ new Date(), resp, email, list.map(x=>x.caseCode).join(', '), rowsOut.length, d1ISO ? fmtLocal(d1ISO) : '', e1ISO ? fmtLocal(e1ISO) : '', g1SerISO ? fmtLocal(g1SerISO) : '', g1UriISO ? fmtLocal(g1UriISO) : '', Object.values(ubcPerCase).some(a=>a && a.length) ? 'sí' : 'no', JSON.stringify(ubcPerCase), JSON.stringify(productsSummary), obs, envioId, (kind==='urine'?'urine':'blood') ];
     const shL = ensureLog();
-    const r = shL.getLastRow()+1;
+    const r = nextDataRow_(shL, [1,14]);
     shL.getRange(r,1,1,log.length).setValues([log]);
     shL.getRange(r,4).setNumberFormat('@');
     const res = {generated:rowsOut.length, envioId, kind};
