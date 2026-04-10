@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPREC Fluidos – Biobanco U. de Chile</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <style>
+    :root {
+      --bg: #f4f7f9; --card: #ffffff; --text: #0a1d31; --muted: #5a6a7b;
+      --primary: #007aff; --primary-light: #e6f2ff; --red: #d92d20; --border: #dde4ec;
+      --info-bg: #e6f2ff; --info-border: #99c7ff; --info-text: #004cb3;
+      --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    }
+    body.dark-mode {
+      --bg: #0d1117; --card: #161b22; --text: #c9d1d9; --muted: #8b949e;
+      --primary: #58a6ff; --primary-light: #1f2d47; --red: #f87171; --border: #30363d;
+      --info-bg: #1f2d47; --info-border: #2f81f7; --info-text: #a5d6ff;
+    }
+    *{box-sizing:border-box}
+    body{margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"; color:var(--text); background:var(--bg); transition: background-color .2s, color .2s; font-size: 16px;}
+    
+    header{padding:12px 24px; background:#161b22; color:#fff; display:flex; gap:24px; align-items:center; justify-content:space-between; border-bottom: 1px solid #30363d;}
+    .header-left {display:flex; align-items:center; gap:16px;}
+    .header-left img { display: block; height: 40px; width: auto; filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.7)); }
+    .title{font-weight:600; font-size: 1.2em; color: #f0f6fc;}
+    .header-right {display:flex; align-items:center; gap:16px;}
+    #meBox { font-size: 0.9em; color: #c9d1d9; }
+    #theme-toggle {background:transparent; border:1px solid #4b5563; color: #d1d5db; border-radius:99px; cursor:pointer; padding:6px; display:flex; align-items:center;}
+    #theme-toggle .sun {display:none;}
+    body.dark-mode #theme-toggle .moon {display:none;}
+    body.dark-mode #theme-toggle .sun {display:block;}
+    
+    .tabs{display:flex; gap:8px; padding:12px 24px; background:var(--card); flex-wrap:nowrap; border-bottom: 1px solid var(--border); overflow-x: auto;}
+    .tab{cursor:pointer; padding:8px 12px; border-radius:8px; color:var(--muted); border:1px solid transparent; font-weight: 500; white-space: nowrap;}
+    .tab.active{color:var(--primary); background: var(--primary-light); border-color: transparent;}
+    
+    main{padding:24px; max-width:1200px; margin:0 auto}
+    .panel{display:none} .panel.active{display:block}
+    .card{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:16px; box-shadow: var(--shadow);}
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:24px}
+    label{font-weight:600; font-size:14px; margin-bottom:6px; display:block; color: var(--text);}
+    input,select,textarea{width:100%; padding:10px 12px; border:1px solid var(--border); border-radius:8px; background:var(--card); color: var(--text); transition: all .2s; font-size: 1em;}
+    input:focus, textarea:focus {border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-light);}
+    .input-with-icon { position: relative; display: flex; align-items: center; }
+    .input-with-icon input { padding-right: 44px; }
+    .input-icon-btn { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); padding: 6px; }
+
+    button{display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:inherit; font-size:1em; font-weight: 600; border-radius: 8px;}
+    button svg {width:16px; height: 16px;}
+    .btn{border:0; padding:10px 16px; background:var(--primary); color:#fff; cursor:pointer;}
+    .btn:disabled {opacity:0.6; cursor:not-allowed;}
+    .btn-ghost{background:transparent; color:var(--text); border:1px solid var(--border); cursor:pointer; font-weight: 500;}
+    .btn-danger{background:var(--red); color:#fff; cursor:pointer}
+    .muted{color:var(--muted)} .error{color:#d92d20; font-weight:600}
+    .info-msg {padding: 4px 8px; font-size: 13px; margin-top: 4px; border-radius: 6px; background-color: var(--info-bg); border: 1px solid var(--info-border); color: var(--info-text);}
+    .right{display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap}
+    .summary{background:var(--bg); border:1px dashed var(--border); padding:16px; border-radius:10px; font-size:14px; min-height: 50px;}
+    
+    .sample-type-selector { display: flex; flex-direction: column; gap: 8px; border: 1px solid var(--border); border-radius: 10px; padding: 12px; }
+    .sample-type-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-radius: 6px; transition: background-color 0.2s; }
+    .sample-type-item.selected { background-color: var(--primary-light); }
+    .sample-type-item .add-type-btn { padding: 6px 10px; font-size: 0.9em; }
+
+    .cases-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .case-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; box-shadow: var(--shadow); display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+    .case-card-info { display: flex; flex-direction: column; gap: 4px; }
+    .case-card-code { font-weight: 700; font-size: 1.2em; color: var(--text); }
+    .case-card-date { font-size: 0.9em; color: var(--muted); }
+    .case-card-tubes { font-size: 0.9em; color: var(--muted); font-weight: 600; }
+    .case-card-add-btn { background-color: var(--primary); color: white; border: none; border-radius: 50%; width: 36px; height: 36px; flex-shrink: 0; }
+    
+    .divider{height:1px; background:var(--border); margin:24px 0}
+    .grid-tubes{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px}
+    .tube{border:1px dashed var(--border); border-radius:10px; padding:10px}
+
+    .modal-bg{position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:50}
+    body.dark-mode .modal-bg{background:rgba(0,0,0,.65);}
+    .modal{background:var(--card); border-radius:12px; border:1px solid var(--border); width:520px; max-width:92vw; padding:20px; box-shadow: var(--shadow);}
+    .modal h3{margin:0 0 8px} 
+    .modal p{margin:0 0 16px; color:var(--muted)}
+    .modal .actions{display:flex; justify-content:flex-end; gap:12px}
+
+    #qr-reader { border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+
+    .num-shortcuts { display: flex; gap: 6px; margin-top: 8px; }
+    .num-btn { padding: 4px 10px; font-size: 0.85em; font-weight: 500; min-width: 32px; justify-content: center; }
+
+    @media (max-width: 768px) {
+      body { font-size: 17px; line-height: 1.5; }
+      .row { grid-template-columns: 1fr; }
+      header {padding: 12px 16px;}
+      main {padding: 16px;}
+      .card { padding: 16px; }
+      .header-left .title { display: none; }
+      .btn, .btn-ghost { padding: 12px 18px; }
+      .case-card-add-btn { width: 40px; height: 40px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <img src="https://drive.google.com/uc?id=1b4bEAy9Ma4_RMtTeOuKt_IZBVAh8vi1q" alt="Logo Biobanco">
+      <div class="title">SPREC Fluidos</div>
+    </div>
+    <div class="header-right">
+      <div id="meBox" class="muted" aria-live="polite">Cargando…</div>
+      <button id="theme-toggle" title="Cambiar tema">
+        <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+      </button>
+    </div>
+  </header>
+  
+  <div class="tabs">
+    <div class="tab active" data-tab="t1">Etapa 1</div>
+    <div class="tab" data-tab="t2a">Etapa 2 · Plasma/Suero</div>
+    <div class="tab" data-tab="t2b">Etapa 2 · Orina</div>
+    <div class="tab" data-tab="t3">Historial</div>
+  </div>
+
+  <main>
+    <section id="t1" class="panel active">
+      <div class="card">
+        <h2>Crear / Actualizar Caso</h2>
+        <div class="row">
+          <div>
+            <label for="c_case">Código de caso Noraybanks (8 dígitos)</label>
+            <div class="input-with-icon">
+                <input id="c_case" type="text" placeholder="01250003" inputmode="numeric" aria-describedby="caseHelp">
+                <button id="scan-qr-btn" class="btn-ghost input-icon-btn" title="Escanear código QR">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1"/></svg>
+                </button>
+            </div>
+            <small class="muted" id="caseHelp">Se respetan ceros a la izquierda.</small>
+          </div>
+        </div>
+        
+        <div class="divider"></div>
+        <label>¿Qué muestras se colectan?</label>
+        
+        <div class="sample-type-selector">
+          <div class="sample-type-item" id="selector-edta" data-type="edta">
+            <span>Tubos tapa lila (Plasma / BC)</span>
+            <button class="btn-ghost add-type-btn">Agregar</button>
+          </div>
+          <div class="sample-type-item" id="selector-serum" data-type="serum">
+            <span>Tubos tapa roja (Suero)</span>
+            <button class="btn-ghost add-type-btn">Agregar</button>
+          </div>
+          <div class="sample-type-item" id="selector-urine" data-type="urine">
+            <span>Orina</span>
+            <button class="btn-ghost add-type-btn">Agregar</button>
+          </div>
+        </div>
+
+        <div id="block_sangre_tiempo" style="display:none; margin-top: 24px;">
+            <label for="c_coll_s">Tiempo de colección (sangre)</label>
+            <div class="right" style="justify-content:flex-start">
+              <input id="c_coll_s" type="datetime-local">
+              <button class="btn-ghost" onclick="setNow('c_coll_s')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Ahora</button>
+            </div>
+        </div>
+        <div class="row" style="margin-top: 16px;">
+            <div id="block_sangre_edta" style="display:none;">
+                <label for="c_edta"># Tubos tapa lila (0–8)</label>
+                <input id="c_edta" type="number" min="0" max="8" value="0">
+                <div class="num-shortcuts">
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_edta', 1)">1</button>
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_edta', 2)">2</button>
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_edta', 3)">3</button>
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_edta', 4)">4</button>
+                </div>
+            </div>
+            <div id="block_sangre_serum" style="display:none;">
+                <label for="c_ser"># Tubos tapa roja (0–8)</label>
+                <input id="c_ser"  type="number" min="0" max="8" value="0">
+                <div class="num-shortcuts">
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_ser', 1)">1</button>
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_ser', 2)">2</button>
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_ser', 3)">3</button>
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_ser', 4)">4</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="block_orina" style="display:none; margin-top: 24px;">
+            <div class="row">
+              <div>
+                <label for="c_coll_u">Tiempo de colección (orina)</label>
+                <div class="right" style="justify-content:flex-start">
+                  <input id="c_coll_u" type="datetime-local">
+                  <button class="btn-ghost" onclick="setNow('c_coll_u')"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Ahora</button>
+                </div>
+              </div>
+              <div>
+                <label for="c_uri"># Frascos Orina (0–8)</label>
+                <input id="c_uri" type="number" min="0" max="8" value="0">
+                <div class="num-shortcuts">
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_uri', 1)">1</button>
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_uri', 2)">2</button>
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_uri', 3)">3</button>
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_uri', 4)">4</button>
+                </div>
+              </div>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+
+        <div class="right">
+          <button id="btnSave" class="btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg>Guardar</button>
+          <button id="btnClear1" class="btn-ghost"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-1.8 1.98-1.8 1.98s.65-1.8 1.98-1.8c1.67 0 3.02-1.35 3.02-3.02 0-1.33 1.8-1.98 1.8-1.98s-.65 1.8-1.98 1.8Z"/></svg>Limpiar</button>
+        </div>
+        <div id="msg1" class="muted" style="margin-top:8px" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section id="t2a" class="panel">
+      <div class="card">
+        <h2>Procesar Plasma/Suero</h2>
+        <div class="row">
+          <div>
+            <div class="search-row"><input id="searchA" type="text" placeholder="Buscar caso… (Enter para limpiar)"></div>
+            <label>Casos pendientes (sangre)</label>
+            <div class="cases-grid" id="listA"></div>
+          </div>
+          <div><label>Selección (máx. 4)</label><div id="chipsA" class="summary">Ninguno.</div></div>
+        </div>
+        <div class="divider"></div>
+        
+        <div id="d1-block-A">
+            <div class="row">
+              <div><label for="p_d1">D.1 inicio 1ª centrif.</label><div class="right" style="justify-content:flex-start"><input id="p_d1" type="datetime-local"><button class="btn-ghost" onclick="setNow('p_d1')">Ahora</button></div></div>
+              <div></div>
+            </div>
+        </div>
+
+        <div id="aliquot-block-A" style="display:none;">
+            <div id="blocksA"></div>
+        </div>
+        
+        <div id="e1g1-block-A" style="display:none;">
+            <div class="row">
+              <div><label for="p_e1">E.1 inicio 2ª centrif.</label><div class="right" style="justify-content:flex-start"><input id="p_e1" type="datetime-local"><button class="btn-ghost" onclick="setNow('p_e1')">Ahora</button></div></div>
+              <div><label for="p_g1s">G.1 almacenamiento (Plasma/Suero)</label><div class="right" style="justify-content:flex-start"><input id="p_g1s" type="datetime-local"><button class="btn-ghost" onclick="setNow('p_g1s')">Ahora</button></div></div>
+            </div>
+            <div class="divider"></div>
+            <label for="p_obs_a">Observaciones</label>
+            <textarea id="p_obs_a" placeholder="opcional"></textarea>
+            <div class="right" style="margin-top:10px">
+                <button id="btnGenA" class="btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>Generar filas</button>
+                <button id="btnClearA" class="btn-ghost">Limpiar</button>
+            </div>
+            <div id="msg2a" class="muted" style="margin-top:8px" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+    
+    <section id="t2b" class="panel">
+      <div class="card">
+        <h2>Procesar Orina</h2>
+        <div class="row">
+          <div>
+            <div class="search-row"><input id="searchB" type="text" placeholder="Buscar caso… (Enter para limpiar)"></div>
+            <label>Casos pendientes (orina)</label><div class="cases-grid" id="listB"></div>
+          </div>
+          <div><label>Selección (máx. 4)</label><div id="chipsB" class="summary">Ninguno.</div></div>
+        </div>
+        
+        <div id="blocksB"></div>
+
+        <div id="g1-urine-block" style="display:none;">
+            <div class="divider"></div>
+            <div class="row">
+              <div><label for="p_g1u">G.1 almacenamiento (Orina)</label><div class="right" style="justify-content:flex-start"><input id="p_g1u" type="datetime-local"><button class="btn-ghost" onclick="setNow('p_g1u')">Ahora</button></div></div>
+              <div></div>
+            </div>
+            <div class="divider"></div>
+            <label for="p_obs_b">Observaciones</label>
+            <textarea id="p_obs_b" placeholder="opcional"></textarea>
+            <div class="right" style="margin-top:10px">
+                <button id="btnGenB" class="btn"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="m9 12 2 2 4-4"/></svg>Generar filas</button>
+                <button id="btnClearB" class="btn-ghost">Limpiar</button>
+            </div>
+            <div id="msg2b" class="muted" style="margin-top:8px" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="t3" class="panel">
+      <div class="card">
+        <h2>Últimos 12 envíos</h2>
+        <div id="historyKPI" class="row"></div>
+        <div style="margin-top:12px; overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; min-width: 800px;">
+            <thead><tr><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Fecha</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Responsable</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Casos</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Total</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Plasma</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Suero</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Orina</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">BC</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">ID</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Tipo</th></tr></thead>
+            <tbody id="histTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+  
+  <div id="modalBG" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalBody">
+    <div class="modal">
+      <h3 id="modalTitle">Listo</h3><p id="modalBody">Operación realizada.</p>
+      <div class="actions"><button id="modalOK" class="btn" onclick="closeModal()">OK</button></div>
+    </div>
+  </div>
+
+  <div id="qrModal" class="modal-bg">
+    <div class="modal">
+      <h3>Escanear Código QR</h3>
+      <p>Apunta la cámara de tu dispositivo al código QR del caso.</p>
+      <div id="qr-reader" style="width:100%;"></div>
+      <div class="actions" style="margin-top: 16px;">
+        <button id="qrCancelBtn" class="btn-ghost">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+    /* ====== Estado Global ====== */
+    let ME=null, CASES=[], STATUS={};
+    let chosenA=[], chosenB=[];
+    let stage1State = { edta: false, serum: false, urine: false };
+
+    /* ====== Helpers UI ====== */
+    function openModal(title, body){
+      document.getElementById('modalTitle').textContent = title || 'Información';
+      document.getElementById('modalBody').textContent = body || '';
+      document.getElementById('modalBG').style.display = 'flex';
+      setTimeout(()=> document.getElementById('modalOK').focus(), 0);
+    }
+    function closeModal(){ 
+      document.getElementById('modalBG').style.display = 'none'; 
+    }
+    function setNow(id){
+      const el=document.getElementById(id); if(!el) return;
+      const n=new Date(), p=n=>String(n).padStart(2,'0');
+      el.value = `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}T${p(n.getHours())}:${p(n.getMinutes())}`;
+    }
+    function setInputValue(inputId, value) {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.value = value;
+        }
+    }
+    function debounce(fn, wait=250){ 
+      let t; 
+      return (...args)=>{ 
+        clearTimeout(t); 
+        t=setTimeout(()=>fn.apply(null,args), wait); 
+      }; 
+    }
+    function toggleButtonState(btn, isLoading, loadingText = 'Cargando...') {
+      if (!btn) return;
+      if (isLoading) {
+        btn.dataset.originalText = btn.innerHTML;
+        btn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> ${loadingText}`;
+        btn.disabled = true;
+      } else {
+        if (btn.dataset.originalText) btn.innerHTML = btn.dataset.originalText;
+        btn.disabled = false;
+      }
+      if (!document.getElementById('anim-spin')) {
+        const style = document.createElement('style'); style.id = 'anim-spin';
+        style.innerHTML = `@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`;
+        document.head.appendChild(style);
+      }
+    }
+    function run(method, payload, onOk, onErr, btn) {
+        if (btn) toggleButtonState(btn, true);
+        const runner = google.script.run
+            .withSuccessHandler((r) => {
+                if (btn) toggleButtonState(btn, false);
+                if (r && r.ok) { onOk && onOk(r); } 
+                else { const msg = (r && r.error) ? r.error : 'Error desconocido'; if (onErr) onErr(msg); else openModal('Error', msg); }
+            })
+            .withFailureHandler((e) => {
+                if (btn) toggleButtonState(btn, false);
+                const msg = e && e.message ? e.message : String(e);
+                if (onErr) onErr(msg); else openModal('Error', msg);
+            });
+        
+        if (payload === undefined) {
+            runner[method]();
+        } else {
+            runner[method](payload);
+        }
+    }
+    
+    /* ====== Lógica de Pestañas ====== */
+    document.querySelectorAll('.tab').forEach(t=>{
+      t.addEventListener('click', ()=>{
+        document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+        document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+        t.classList.add('active'); document.getElementById(t.dataset.tab).classList.add('active');
+        if(t.dataset.tab==='t3') loadHistory(); 
+        if(t.dataset.tab==='t2a') loadPendingA(); 
+        if(t.dataset.tab==='t2b') loadPendingB();
+      });
+    });
+
+    function refreshCasesAndStatus(cb){
+      run('uiListCasesAndStatus', undefined, (r)=>{
+        const obj=r.data||{}; CASES = obj.cases||[]; STATUS = obj.status||{};
+        if(typeof cb==='function') cb();
+      });
+    }
+
+    /* ====== Arranque de la App (Boot) ====== */
+    (function boot(){
+      const themeToggle = document.getElementById('theme-toggle');
+      const preferDark = window.matchMedia('(prefers-color-scheme: dark)');
+      function applyTheme(theme) {
+        if (theme === 'dark') { document.body.classList.add('dark-mode'); } 
+        else { document.body.classList.remove('dark-mode'); }
+      }
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme) { applyTheme(savedTheme); } 
+      else { applyTheme(preferDark.matches ? 'dark' : 'light'); }
+      
+      themeToggle.addEventListener('click', () => {
+        const newTheme = document.body.classList.contains('dark-mode') ? 'light' : 'dark';
+        localStorage.setItem('theme', newTheme);
+        applyTheme(newTheme);
+      });
+
+      run('uiMe', undefined, (m)=>{
+        ME=m.data||m; document.getElementById('meBox').textContent = `${ME.name}`;
+        refreshCasesAndStatus();
+      });
+    })();
+    
+    /* ===================================== */
+    /* ====== LÓGICA DEL ESCÁNER QR ====== */
+    /* ===================================== */
+    const qrModal = document.getElementById('qrModal');
+    const qrCancelBtn = document.getElementById('qrCancelBtn');
+    const scanQrBtn = document.getElementById('scan-qr-btn');
+    const html5QrCode = new Html5Qrcode("qr-reader");
+
+    const onScanSuccess = (decodedText, decodedResult) => {
+        html5QrCode.stop().then(() => {
+            qrModal.style.display = 'none';
+            c_case_input.value = decodedText;
+            c_case_input.dispatchEvent(new Event('blur'));
+        }).catch(err => console.error("Failed to stop QR scanner.", err));
+    };
+    const onScanFailure = (error) => { /* No hacer nada */ };
+    
+    scanQrBtn.addEventListener('click', () => {
+        qrModal.style.display = 'flex';
+        html5QrCode.start( { facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess, onScanFailure)
+        .catch(err => {
+            alert(`No se pudo iniciar la cámara. Revisa los permisos en tu navegador. Error: ${err}`);
+            qrModal.style.display = 'none';
+        });
+    });
+
+    qrCancelBtn.addEventListener('click', () => {
+        html5QrCode.stop().catch(err => console.error("Scanner already stopped or failed to stop.", err));
+        qrModal.style.display = 'none';
+    });
+    
+    /* ===================================== */
+    /* ====== LÓGICA DE LA ETAPA 1 ====== */
+    /* ===================================== */
+    const c_case_input = document.getElementById('c_case');
+    const c_case_help = document.getElementById('caseHelp');
+    
+    c_case_input.addEventListener('blur', debounce(() => {
+        const code = c_case_input.value.trim();
+        c_case_help.textContent = 'Se respetan ceros a la izquierda.';
+        c_case_help.className = 'muted';
+        if (/^\d{8}$/.test(code)) {
+            run('uiCheckCaseExists', { caseCode: code }, (r) => {
+                if (r.data.exists) {
+                    c_case_help.textContent = 'ℹ️ Este caso ya existe. La información será actualizada.';
+                    c_case_help.className = 'info-msg';
+                }
+            });
+        }
+    }, 300));
+
+    document.querySelector('.sample-type-selector').addEventListener('click', (e) => {
+        const item = e.target.closest('.sample-type-item');
+        if (!item) return;
+        const type = item.dataset.type;
+        stage1State[type] = !stage1State[type];
+        renderStage1Form();
+    });
+
+    function renderStage1Form() {
+        Object.keys(stage1State).forEach(type => {
+            const item = document.getElementById(`selector-${type}`);
+            const btn = item.querySelector('button');
+            if (stage1State[type]) {
+                item.classList.add('selected');
+                btn.textContent = 'Quitar';
+            } else {
+                item.classList.remove('selected');
+                btn.textContent = 'Agregar';
+            }
+        });
+        const showBloodTime = stage1State.edta || stage1State.serum;
+        document.getElementById('block_sangre_tiempo').style.display = showBloodTime ? 'block' : 'none';
+        document.getElementById('block_sangre_edta').style.display = stage1State.edta ? 'block' : 'none';
+        document.getElementById('block_sangre_serum').style.display = stage1State.serum ? 'block' : 'none';
+        document.getElementById('block_orina').style.display = stage1State.urine ? 'block' : 'none';
+    }
+
+    document.getElementById('btnClear1').onclick = () => {
+        c_case_input.value = '';
+        stage1State = { edta: false, serum: false, urine: false };
+        renderStage1Form();
+        document.getElementById('c_coll_s').value = '';
+        document.getElementById('c_edta').value = '0';
+        document.getElementById('c_ser').value = '0';
+        document.getElementById('c_coll_u').value = '';
+        document.getElementById('c_uri').value = '0';
+        document.getElementById('msg1').textContent = '';
+        c_case_help.textContent = 'Se respetan ceros a la izquierda.';
+        c_case_help.className = 'muted';
+    };
+
+    document.getElementById('btnSave').onclick = (e)=>{
+      const btn = e.currentTarget;
+      const code = c_case_input.value.trim();
+      const selEDTA = stage1State.edta, selSER = stage1State.serum, selURI = stage1State.urine;
+      const collS = document.getElementById('c_coll_s').value, collU = document.getElementById('c_coll_u').value;
+      const nE = parseInt(document.getElementById('c_edta').value||'0',10), nS = parseInt(document.getElementById('c_ser').value||'0',10), nU = parseInt(document.getElementById('c_uri').value||'0',10);
+      const msg = document.getElementById('msg1'); msg.textContent = '';
+      if (!/^\d{8}$/.test(code)) { msg.innerHTML='<span class="error">Código inválido (8 dígitos).</span>'; return; }
+      if (!selEDTA && !selSER && !selURI) { msg.innerHTML='<span class="error">Selecciona al menos un tipo de muestra.</span>'; return; }
+      if ((selEDTA || selSER) && !collS) { msg.innerHTML='<span class="error">Falta tiempo de colección (sangre).</span>'; return; }
+      if (selURI && !collU) { msg.innerHTML='<span class="error">Falta tiempo de colección (orina).</span>'; return; }
+      const payload = { action: 'createOrUpdateCase', caseCode: code, selEDTA, selSER, selURI, collectionISO_sangre: (selEDTA || selSER) ? collS : null, collectionISO_orina: selURI ? collU : null, tubesEDTA: nE, tubesSerum: nS, tubesUrine: nU };
+      run('uiCreateOrUpdateCase', payload, (r)=>{
+        openModal('Caso guardado', `El caso ${code} fue guardado/actualizado correctamente.`);
+        document.getElementById('btnClear1').click();
+        refreshCasesAndStatus();
+      }, (e)=> { msg.innerHTML=`<span class="error">${e}</span>`; }, btn);
+    };
+
+    /* ===================================== */
+    /* ====== LÓGICA DE LA ETAPA 2 (SANGRE) ====== */
+    /* ===================================== */
+    function loadPendingA(){ refreshCasesAndStatus(()=>renderListA()); }
+    function renderListA(filter=''){
+      const grid = document.getElementById('listA'), f = String(filter||'').trim().toLowerCase();
+      grid.innerHTML = '';
+      const candidates = CASES.filter(c=>(STATUS[c.codigoCaso]||{}).pendingBlood && (!f || c.codigoCaso.toLowerCase().includes(f)));
+      if (candidates.length === 0) { grid.innerHTML = '<p class="muted" style="padding: 16px;">No hay casos de sangre pendientes.</p>'; return; }
+      candidates.forEach(c=>{
+        const card = document.createElement('div'); card.className = 'case-card'; card.dataset.code = c.codigoCaso;
+        card.innerHTML = `<div class="case-card-info">
+            <span class="case-card-code">${c.codigoCaso}</span>
+            <span class="case-card-date">Colección: ${c.tColSangre || 'N/A'}</span>
+            <span class="case-card-tubes">Tubos: STL:${c.nTubosEDTA}, STR:${c.nTubosSERUM}</span>
+        </div>
+        <button class="case-card-add-btn addA" title="Agregar caso"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>`;
+        grid.appendChild(card);
+      });
+    }
+    document.getElementById('listA').addEventListener('click',(e)=>{ if(e.target && e.target.closest('.addA')){ addA(e.target.closest('.case-card').dataset.code); } });
+    document.getElementById('searchA').addEventListener('input', debounce((ev)=>renderListA(ev.target.value), 250));
+    document.getElementById('searchA').addEventListener('keydown',(ev)=>{ if(ev.key==='Enter'){ ev.target.value=''; renderListA(''); } });
+    
+    function updateSerumFlowUI() {
+        const show = chosenA.length > 0;
+        document.getElementById('aliquot-block-A').style.display = show ? 'block' : 'none';
+        document.getElementById('e1g1-block-A').style.display = show ? 'block' : 'none';
+    }
+    function addA(code){ if(!chosenA.includes(code)) chosenA.push(code); if(chosenA.length>4) chosenA.shift(); renderChipsA(); renderBlocksA(); updateSerumFlowUI(); }
+    function removeA(code){ chosenA = chosenA.filter(x=>x!==code); renderChipsA(); renderBlocksA(); updateSerumFlowUI(); }
+    
+    function renderChipsA(){
+      const box=document.getElementById('chipsA'); if(!chosenA.length){ box.textContent='Ninguno.'; return; }
+      box.innerHTML = chosenA.map(c=>`<span class="chip" data-code="${c}">${c}<button class="rmA" data-code="${c}" style="border:0; background:transparent; padding:0 0 0 8px; height:16px; color:var(--text); cursor:pointer;">&times;</button></span>`).join('');
+      box.querySelectorAll('.rmA').forEach(btn=>{ btn.onclick = ()=> removeA(btn.dataset.code); });
+    }
+    
+    function renderBlocksA(){
+      const host=document.getElementById('blocksA'); host.innerHTML='';
+      const frag=document.createDocumentFragment();
+      chosenA.forEach(code=>{
+        const c = CASES.find(x=>x.codigoCaso===code)||{};
+        const st= STATUS[code]||{processed:{}};
+        const pro= st.processed||{};
+        const wrap = document.createElement('div'); wrap.className='card';
+        let html = `<h3 style="margin:0 0 8px">Caso ${code}</h3>`;
+        if(c.nTubosEDTA>0 && !pro.plasma){
+          html += `<div class="divider"></div><h4>Plasma (de tubo lila)</h4><div class="grid-tubes">`;
+          for(let t=1;t<=c.nTubosEDTA;t++){
+            const inputId = `aliq-plasma-${code}-${t}`;
+            html += `<div class="tube"><div><strong>Tubo ${t}</strong></div><label>N° alícuotas (0–9)</label>
+                     <input type="number" min="0" max="9" value="0" id="${inputId}">
+                     <div class="num-shortcuts">
+                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 1)">1</button>
+                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 2)">2</button>
+                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 3)">3</button>
+                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 4)">4</button>
+                     </div>
+                     <div style="margin-top:8px"><label><input type="checkbox" id="ubc-${code}-${t}"> Obtener BC</label></div></div>`;
+          }
+          html += `</div>`;
+        } else if (c.nTubosEDTA > 0) { html += `<div class="divider"></div><p class="muted">Plasma de este caso ya fue procesado.</p>`; }
+        if(c.nTubosSERUM>0 && !pro.serum){
+          html += `<div class="divider"></div><h4>Suero (de tubo rojo)</h4><div class="grid-tubes">`;
+          for(let t=1;t<=c.nTubosSERUM;t++){
+            const inputId = `aliq-serum-${code}-${t}`;
+            html += `<div class="tube"><div><strong>Tubo ${t}</strong></div><label>N° alícuotas (0–9)</label>
+                     <input type="number" min="0" max="9" value="0" id="${inputId}">
+                     <div class="num-shortcuts">
+                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 1)">1</button>
+                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 2)">2</button>
+                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 3)">3</button>
+                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 4)">4</button>
+                     </div>
+                     </div>`;
+          }
+          html += `</div>`;
+        } else if (c.nTubosSERUM > 0) { html += `<div class="divider"></div><p class="muted">Suero de este caso ya fue procesado.</p>`; }
+        wrap.innerHTML = html; frag.appendChild(wrap);
+      });
+      host.appendChild(frag);
+    }
+    document.getElementById('btnClearA').onclick = ()=>{ chosenA=[]; renderChipsA(); renderBlocksA(); updateSerumFlowUI(); document.getElementById('p_d1').value=''; document.getElementById('p_e1').value=''; document.getElementById('p_g1s').value=''; document.getElementById('p_obs_a').value=''; document.getElementById('msg2a').textContent=''; };
+    
+    document.getElementById('btnGenA').onclick = (e)=>{ 
+        const btn = e.currentTarget;
+        const msg=document.getElementById('msg2a'); msg.textContent='';
+        if(!chosenA.length){ msg.innerHTML='<span class="error">Agrega al menos un caso.</span>'; return; }
+        const d1=document.getElementById('p_d1').value, e1=document.getElementById('p_e1').value, g1=document.getElementById('p_g1s').value, obs=document.getElementById('p_obs_a').value;
+        const d1d=new Date(d1), e1d=new Date(e1), g1d=new Date(g1);
+        if(!d1){ msg.innerHTML='<span class="error">Completa D.1.</span>'; return; }
+        if (chosenA.length > 0 && (!e1 || !g1)) { msg.innerHTML='<span class="error">Completa E.1 y G.1.</span>'; return; }
+        if(!(d1d<e1d && e1d<g1d)){ msg.innerHTML='<span class="error">Orden estricto: D.1 < E.1 < G.1.</span>'; return; }
+        if(((e1d-d1d)/60000) <= 10){ msg.innerHTML='<span class="error">E.1 − D.1 debe ser > 10 min.</span>'; return; }
+        const casesPayload = chosenA.map(code=>{
+            const c=CASES.find(x=>x.codigoCaso===code)||{}, pro=(STATUS[code]||{}).processed||{};
+            const p=[], s=[], ubc=[];
+            if(c.nTubosEDTA>0 && !pro.plasma){ for(let t=1;t<=c.nTubosEDTA;t++){ const v=parseInt((document.getElementById(`aliq-plasma-${code}-${t}`)||{}).value||'0',10); if(v>0) p.push({tube:t,aliquots:v}); const cb=document.getElementById(`ubc-${code}-${t}`); if(cb&&cb.checked) ubc.push(t); } }
+            if(c.nTubosSERUM>0 && !pro.serum){ for(let t=1;t<=c.nTubosSERUM;t++){ const v=parseInt((document.getElementById(`aliq-serum-${code}-${t}`)||{}).value||'0',10); if(v>0) s.push({tube:t,aliquots:v}); } }
+            const products=[]; if(p.length) products.push({type:'plasma', tubes:p}); if(s.length) products.push({type:'serum', tubes:s});
+            return {caseCode:code, products, ubcTubes:ubc};
+        });
+        run('uiGenerateRows2', {action:'generateRows2', kind:'blood', d1StartISO:d1, e1StartISO:e1, g1StartISO:g1, notes:obs, cases:casesPayload}, (r)=>{
+            const res=r.data||{}; let msgtxt=`Filas generadas: ${res.generated}. Envío ${res.envioId}.`;
+            if(res.warning) msgtxt += ` ⚠ ${res.warning}`;
+            openModal('Envío completado', msgtxt);
+            document.getElementById('btnClearA').click(); refreshCasesAndStatus(()=>renderListA());
+        }, (e)=> { msg.innerHTML=`<span class="error">${e}</span>`; }, btn);
+    };
+
+    /* ===================================== */
+    /* ====== LÓGICA DE LA ETAPA 2 (ORINA) ====== */
+    /* ===================================== */
+    function loadPendingB(){ refreshCasesAndStatus(()=>renderListB()); }
+    function renderListB(filter=''){
+        const grid = document.getElementById('listB'), f = String(filter||'').trim().toLowerCase();
+        grid.innerHTML = '';
+        const candidates = CASES.filter(c=>(STATUS[c.codigoCaso]||{}).pendingUrine && (!f || c.codigoCaso.toLowerCase().includes(f)));
+        if (candidates.length === 0) { grid.innerHTML = '<p class="muted" style="padding: 16px;">No hay casos de orina pendientes.</p>'; return; }
+        candidates.forEach(c=>{
+            const card = document.createElement('div'); card.className = 'case-card'; card.dataset.code = c.codigoCaso;
+            card.innerHTML = `<div class="case-card-info"><span class="case-card-code">${c.codigoCaso}</span><span class="case-card-date">Colección: ${c.tColOrina0 || 'N/A'}</span><span class="case-card-tubes">Frascos: ${c.nTubosURINE}</span></div><div style="display:flex; gap: 8px;"><button class="case-card-add-btn addB" title="Agregar caso"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button><button class="discardB" title="Descartar orina" style="background: var(--red); color: white; border: none; border-radius: 50%; width: 36px; height: 36px; flex-shrink: 0;"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
+            grid.appendChild(card);
+        });
+    }
+    document.getElementById('listB').addEventListener('click',(e)=>{
+      const item = e.target.closest('.case-card'); if(!item) return; const code = item.dataset.code;
+      if(e.target.closest('.addB')) addB(code);
+      if(e.target.closest('.discardB')) discardUrine(code);
+    });
+    document.getElementById('searchB').addEventListener('input', debounce((ev)=>renderListB(ev.target.value), 250));
+    document.getElementById('searchB').addEventListener('keydown',(ev)=>{ if(ev.key==='Enter'){ ev.target.value=''; renderListB(''); } });
+    function toggleG1UrineBlock() {
+        const block = document.getElementById('g1-urine-block');
+        block.style.display = chosenB.length > 0 ? 'block' : 'none';
+    }
+    function addB(code){ if(!chosenB.includes(code)) chosenB.push(code); if(chosenB.length > 4) chosenB.shift(); renderChipsB(); renderBlocksB(); toggleG1UrineBlock(); }
+    function removeB(code){ chosenB = chosenB.filter(x=>x!==code); renderChipsB(); renderBlocksB(); toggleG1UrineBlock(); }
+    function renderChipsB(){
+        const box=document.getElementById('chipsB'); if(!chosenB.length){ box.textContent='Ninguno.'; return; }
+        box.innerHTML = chosenB.map(c=>`<span class="chip" data-code="${c}">${c}<button class="rmB" data-code="${c}" style="border:0; background:transparent; padding:0 0 0 8px; height:16px; color:var(--text); cursor:pointer;">&times;</button></span>`).join('');
+        box.querySelectorAll('.rmB').forEach(btn=>{ btn.onclick = ()=> removeB(btn.dataset.code); });
+    }
+    function renderBlocksB(){
+      const host=document.getElementById('blocksB'); host.innerHTML='';
+      if (chosenB.length === 0) return;
+      const frag=document.createDocumentFragment();
+      chosenB.forEach(code=>{
+        const c = CASES.find(x=>x.codigoCaso===code)||{};
+        const wrap=document.createElement('div'); wrap.className='card';
+        let html = `<h3 style="margin:0 0 8px">Caso ${code}</h3><div class="grid-tubes">`;
+        for(let t=1;t<=c.nTubosURINE;t++){
+          const inputId = `aliq-urine-${code}-${t}`;
+          html += `<div class="tube"><div><strong>Frasco ${t}</strong></div><label style="margin-top:6px">N° alícuotas (0–9)</label>
+                   <input type="number" min="0" max="9" value="0" id="${inputId}">
+                   <div class="num-shortcuts">
+                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 1)">1</button>
+                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 2)">2</button>
+                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 3)">3</button>
+                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 4)">4</button>
+                   </div>
+                   </div>`;
+        }
+        html += `</div>`;
+        wrap.innerHTML = html; 
+        frag.appendChild(wrap);
+      });
+      host.appendChild(frag);
+    }
+    function discardUrine(code){
+      if(!confirm(`¿Descartar orina del caso ${code}? Esto pondrá el número de frascos de orina en 0.`)) return;
+      run('uiDiscardUrine', {caseCode:code, purgeTimes:true}, ()=>{
+        openModal('Orina descartada', `Caso ${code}: orina removida de pendientes.`);
+        refreshCasesAndStatus(()=>renderListB());
+      });
+    }
+    document.getElementById('btnClearB').onclick = ()=>{ chosenB=[]; renderChipsB(); renderBlocksB(); toggleG1UrineBlock(); document.getElementById('p_g1u').value=''; document.getElementById('p_obs_b').value=''; if(document.getElementById('msg2b')) document.getElementById('msg2b').textContent=''; };
+    document.getElementById('btnGenB').onclick = (e)=>{
+        const btn = e.currentTarget;
+        const msg=document.getElementById('msg2b'); msg.textContent='';
+        if(!chosenB.length){ msg.innerHTML='<span class="error">Agrega al menos un caso.</span>'; return; }
+        const g1u=document.getElementById('p_g1u').value, obs=document.getElementById('p_obs_b').value;
+        if(!g1u){ msg.innerHTML='<span class="error">Completa G.1 (Orina).</span>'; return; }
+        const casesPayload = chosenB.map(code=>{
+            const c=CASES.find(x=>x.codigoCaso===code)||{}, pro=(STATUS[code]||{}).processed||{};
+            const urine=[];
+            if(c.nTubosURINE>0 && !pro.urine){ for(let t=1;t<=c.nTubosURINE;t++){ const v=parseInt((document.getElementById(`aliq-urine-${code}-${t}`)||{}).value||'0',10); if(v>0) urine.push({tube:t,aliquots:v}); } }
+            return {caseCode:code, urine};
+        });
+        run('uiGenerateRows2', {action:'generateRows2', kind:'urine', g1UrineISO:g1u, notes:obs, cases:casesPayload}, (r)=>{
+            const res=r.data||{};
+            openModal('Envío completado', `Filas generadas: ${res.generated}. Envío ${res.envioId}.`);
+            document.getElementById('btnClearB').click();
+            refreshCasesAndStatus(()=>renderListB());
+        }, (e)=> { msg.innerHTML=`<span class="error">${e}</span>`; }, btn);
+    };
+
+    /* ===================================== */
+    /* ====== LÓGICA DEL HISTORIAL ====== */
+    /* ===================================== */
+    function loadHistory(){
+      const kpi=document.getElementById('historyKPI'), tb=document.getElementById('histTbody');
+      kpi.innerHTML='Cargando…'; tb.innerHTML='';
+      run('uiListHistory', 12, (r)=>{
+        const list=r.data||[]; if(!list.length){ kpi.innerHTML='<div class="muted">Sin envíos</div>'; return; }
+        const sum=list.reduce((a,x)=>({total:a.total+x.totalFilas, plasma:a.plasma+x.plasmaTotal, serum:a.serum+x.serumTotal, urine:a.urine+x.urineTotal}), {total:0,plasma:0,serum:0,urine:0});
+        kpi.innerHTML = `<div class="card"><div class="muted">Total filas</div><div style="font-size:22px;font-weight:700">${sum.total}</div></div><div class="card"><div class="muted">Plasma</div><div style="font-size:22px;font-weight:700">${sum.plasma}</div></div><div class="card"><div class="muted">Suero</div><div style="font-size:22px;font-weight:700">${sum.serum}</div></div><div class="card"><div class="muted">Orina</div><div style="font-size:22px;font-weight:700">${sum.urine}</div></div>`;
+        tb.innerHTML = list.map(x=> `<tr class="${x.kind === 'blood' ? 'kind-blood' : 'kind-urine'}">
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.fechaEnvio}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.responsable}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${(x.casos||[]).join(', ')}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)"><span class="total-filas">${x.totalFilas}</span></td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.plasmaTotal}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.serumTotal}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.urineTotal}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.ubcTotal}</td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)"><span class="envio-id">${x.envioId}</span></td>
+          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.kind}</td>
+        </tr>`).join('');
+      });
+    }
+</script>
+</body>
+</html>
