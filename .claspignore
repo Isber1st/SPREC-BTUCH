@@ -1,0 +1,9 @@
+.git/**
+.gitignore
+.claspignore
+.clasp.json
+README.md
+BACKUP.md
+scripts/**
+backups/**
+node_modules/**
