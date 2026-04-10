@@ -484,6 +484,20 @@
       justify-content:center;
       background:linear-gradient(145deg, rgba(255,255,255,0.85), rgba(223,245,238,0.7));
     }
+    .history-kpi-card .kpi-value{
+      margin-top:6px;
+      font-size:1.65rem;
+      line-height:1;
+      font-weight:850;
+      letter-spacing:-.04em;
+      color:var(--text);
+    }
+    .history-table-wrap{
+      margin-top:16px;
+      overflow-x:auto;
+      border-radius:20px;
+      box-shadow:var(--shadow-soft);
+    }
     table{
       width:100%;
       border-collapse:separate;
@@ -512,10 +526,26 @@
       border-bottom:1px solid var(--border);
       vertical-align:top;
     }
-    tbody tr:nth-child(even){background:var(--table-stripe)}
-    tbody tr:hover{background:var(--primary-soft)}
-    tbody tr:last-child td{border-bottom:0}
-    .total-filas, .envio-id{font-weight:700}
+      tbody tr:nth-child(even){background:var(--table-stripe)}
+      tbody tr:hover{background:var(--primary-soft)}
+      tbody tr:last-child td{border-bottom:0}
+    .total-filas, .envio-id{font-weight:800}
+    .envio-id{
+      display:inline-block;
+      max-width:260px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      vertical-align:bottom;
+      white-space:nowrap;
+    }
+    .history-cases{
+      display:inline-block;
+      max-width:220px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      vertical-align:bottom;
+      white-space:nowrap;
+    }
     .kind-badge{
       display:inline-flex;
       align-items:center;
@@ -592,6 +622,54 @@
       .cases-grid{grid-template-columns:1fr; gap:12px}
       .case-card{align-items:flex-start; border-radius:20px}
       .case-card-actions{padding-top:2px}
+      #historyKPI{grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px}
+      #historyKPI .card{min-height:88px; padding:14px}
+      .history-kpi-card .kpi-value{font-size:1.4rem}
+      .history-table-wrap{
+        overflow:visible;
+        box-shadow:none;
+      }
+      .history-table{
+        min-width:0;
+        border:0;
+        background:transparent;
+        display:block;
+      }
+      .history-table thead{display:none}
+      .history-table tbody{display:grid; gap:12px}
+      .history-table tbody tr{
+        display:block;
+        border:1px solid var(--border);
+        border-radius:20px;
+        background:linear-gradient(145deg, rgba(255,255,255,.86), rgba(238,248,245,.64));
+        box-shadow:var(--shadow-soft);
+        overflow:hidden;
+      }
+      .history-table tbody tr:nth-child(even){background:linear-gradient(145deg, rgba(255,255,255,.86), rgba(238,248,245,.64))}
+      .history-table tbody tr:hover{background:linear-gradient(145deg, rgba(255,255,255,.9), rgba(223,245,238,.72))}
+      .history-table tbody td{
+        display:flex;
+        justify-content:space-between;
+        gap:14px;
+        padding:10px 14px;
+        border-bottom:1px solid var(--border);
+        text-align:right;
+      }
+      .history-table tbody td::before{
+        content:attr(data-label);
+        color:var(--muted);
+        font-size:.78rem;
+        font-weight:800;
+        letter-spacing:.06em;
+        text-transform:uppercase;
+        text-align:left;
+      }
+      .history-table tbody td:last-child{border-bottom:0}
+      .history-cases, .envio-id{
+        max-width:55vw;
+        white-space:normal;
+        text-align:right;
+      }
       .modal{padding:18px; border-radius:22px}
     }
   </style>
@@ -804,11 +882,11 @@
 
     <section id="t3" class="panel">
       <div class="card">
-        <h2>Últimos 12 envíos</h2>
+        <h2>Ultimos 12 envios</h2>
         <div id="historyKPI" class="row"></div>
-        <div style="margin-top:12px; overflow-x:auto;">
-          <table style="width:100%; border-collapse:collapse; min-width: 800px;">
-            <thead><tr><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Fecha</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Responsable</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Casos</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Total</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Plasma</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Suero</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Orina</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">BC</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">ID</th><th style="text-align:left;border-bottom:1px solid var(--border);padding:8px">Tipo</th></tr></thead>
+        <div class="history-table-wrap">
+          <table class="history-table">
+            <thead><tr><th>Fecha</th><th>Responsable</th><th>Casos</th><th>Total</th><th>Plasma</th><th>Suero</th><th>Orina</th><th>BC</th><th>ID</th><th>Tipo</th></tr></thead>
             <tbody id="histTbody"></tbody>
           </table>
         </div>
@@ -818,7 +896,7 @@
   
   <div id="modalBG" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalBody">
     <div class="modal">
-      <h3 id="modalTitle">Listo</h3><p id="modalBody">Operación realizada.</p>
+      <h3 id="modalTitle">Listo</h3><p id="modalBody">Operacion realizada.</p>
       <div class="actions"><button id="modalOK" class="btn" onclick="closeModal()">OK</button></div>
     </div>
   </div>
@@ -1266,23 +1344,23 @@
     /* ===================================== */
     function loadHistory(){
       const kpi=document.getElementById('historyKPI'), tb=document.getElementById('histTbody');
-      kpi.innerHTML='Cargando…'; tb.innerHTML='';
+      kpi.innerHTML='Cargando...'; tb.innerHTML='';
       run('uiListHistory', 12, (r)=>{
-        const list=r.data||[]; if(!list.length){ kpi.innerHTML='<div class="muted">Sin envíos</div>'; return; }
+        const list=r.data||[]; if(!list.length){ kpi.innerHTML='<div class="muted">Sin envios</div>'; return; }
         const kindLabel = (kind)=> kind === 'blood' ? 'Sangre' : (kind === 'urine' ? 'Orina' : (kind || 'N/A'));
         const sum=list.reduce((a,x)=>({total:a.total+x.totalFilas, plasma:a.plasma+x.plasmaTotal, serum:a.serum+x.serumTotal, urine:a.urine+x.urineTotal}), {total:0,plasma:0,serum:0,urine:0});
-        kpi.innerHTML = `<div class="card"><div class="muted">Total filas</div><div style="font-size:22px;font-weight:700">${sum.total}</div></div><div class="card"><div class="muted">Plasma</div><div style="font-size:22px;font-weight:700">${sum.plasma}</div></div><div class="card"><div class="muted">Suero</div><div style="font-size:22px;font-weight:700">${sum.serum}</div></div><div class="card"><div class="muted">Orina</div><div style="font-size:22px;font-weight:700">${sum.urine}</div></div>`;
+        kpi.innerHTML = `<div class="card history-kpi-card"><div class="muted">Total filas</div><div class="kpi-value">${sum.total}</div></div><div class="card history-kpi-card"><div class="muted">Plasma</div><div class="kpi-value">${sum.plasma}</div></div><div class="card history-kpi-card"><div class="muted">Suero</div><div class="kpi-value">${sum.serum}</div></div><div class="card history-kpi-card"><div class="muted">Orina</div><div class="kpi-value">${sum.urine}</div></div>`;
         tb.innerHTML = list.map(x=> `<tr class="${x.kind === 'blood' ? 'kind-blood' : 'kind-urine'}">
-          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.fechaEnvio}</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.responsable}</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)">${(x.casos||[]).join(', ')}</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)"><span class="total-filas">${x.totalFilas}</span></td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.plasmaTotal}</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.serumTotal}</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.urineTotal}</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)">${x.ubcTotal}</td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)"><span class="envio-id">${x.envioId}</span></td>
-          <td style="padding:8px;border-bottom:1px solid var(--border)"><span class="kind-badge ${x.kind === 'blood' ? 'blood' : 'urine'}">${kindLabel(x.kind)}</span></td>
+          <td data-label="Fecha">${x.fechaEnvio}</td>
+          <td data-label="Responsable">${x.responsable}</td>
+          <td data-label="Casos"><span class="history-cases">${(x.casos||[]).join(', ')}</span></td>
+          <td data-label="Total"><span class="total-filas">${x.totalFilas}</span></td>
+          <td data-label="Plasma">${x.plasmaTotal}</td>
+          <td data-label="Suero">${x.serumTotal}</td>
+          <td data-label="Orina">${x.urineTotal}</td>
+          <td data-label="BC">${x.ubcTotal}</td>
+          <td data-label="ID"><span class="envio-id">${x.envioId}</span></td>
+          <td data-label="Tipo"><span class="kind-badge ${x.kind === 'blood' ? 'blood' : 'urine'}">${kindLabel(x.kind)}</span></td>
         </tr>`).join('');
       });
     }
