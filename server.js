@@ -124,6 +124,7 @@ function doPost(e){
     if(p.action==='createOrUpdateCase') return createOrUpdateCase_(p);
     if(p.action==='generateRows2')      return generateRows2_(p);
     if(p.action==='discardUrine')       return discardUrine_(p);
+    if(p.action==='discardBlood')       return discardBlood_(p);
     if(p.action==='checkCaseExists')    return checkCaseExists_(p.caseCode);
     if(p.action==='listCasesAndStatus') return listCasesAndStatus_();
     if(p.action==='listHistory')        return listHistory_(Number(p?.limit||12));
@@ -442,6 +443,24 @@ function discardUrine_(p){
   CacheService.getDocumentCache().remove('processed_types_v1');
   return ok({caseCode:code, nTubosURINE:0});
 }
+function discardBlood_(p){
+  const code = String(p.caseCode||'').trim();
+  if(!CASE_CODE_REGEX.test(code)) return err('Código inválido.');
+  const q = findCaseRow_(code); if(q.row<0) return err('Caso no existe.');
+  const sh = q.sh; const map = headMap_(sh);
+  const shD = ensureData();
+  if(shD.getLastRow()>=2){
+    const hasBlood = shD.getRange(2,1,shD.getLastRow()-1,4).getValues().some(r=>{
+      const nb = String(r[1]||'');
+      return nb.startsWith(code) && (nb.includes('M16') || nb.includes('M26') || nb.includes('M03'));
+    });
+    if(hasBlood) return err('No se puede descartar: ya existen filas de plasma/suero generadas para este caso.');
+  }
+  if(map.nTubosEDTA) sh.getRange(q.row, map.nTubosEDTA).setValue(0);
+  if(map.nTubosSERUM) sh.getRange(q.row, map.nTubosSERUM).setValue(0);
+  CacheService.getDocumentCache().remove('processed_types_v1');
+  return ok({caseCode:code, nTubosEDTA:0, nTubosSERUM:0});
+}
 function listHistory_(limit){
   const sh = ensureLog(); const last = sh.getLastRow(); if(last<2) return ok([]);
   const data = sh.getRange(2,1,last-1,HEAD_LOG.length).getValues().slice(-limit).reverse();
@@ -464,5 +483,6 @@ function uiMe(){ return JSON.parse(me_().getContent()); }
 function uiCreateOrUpdateCase(p){ return JSON.parse(createOrUpdateCase_(p).getContent()); }
 function uiGenerateRows2(p){ return JSON.parse(generateRows2_(p).getContent()); }
 function uiDiscardUrine(p){ return JSON.parse(discardUrine_(p).getContent()); }
+function uiDiscardBlood(p){ return JSON.parse(discardBlood_(p).getContent()); }
 function uiListHistory(limit){ return JSON.parse(listHistory_(limit).getContent()); }
 function uiCheckCaseExists(p) { return JSON.parse(checkCaseExists_(p.caseCode).getContent()); }

@@ -258,7 +258,7 @@
     h3{font-size:1.15rem}
     h4{font-size:1rem; color:var(--text); margin-bottom:12px}
     .row{display:grid; grid-template-columns:1fr 1fr; gap:24px}
-    label{font-weight:700; font-size:13px; margin-bottom:8px; display:block; color: var(--text); text-transform:uppercase; letter-spacing:.04em;}
+    label{font-weight:700; font-size:0.875rem; margin-bottom:8px; display:block; color: var(--text); text-transform:uppercase; letter-spacing:.04em;}
     input,select,textarea{
       width:100%;
       padding:12px 14px;
@@ -333,7 +333,7 @@
       border:0;
     }
     .muted{color:var(--muted)} .error{color:#d92d20; font-weight:600}
-    .info-msg {padding: 8px 10px; font-size: 13px; margin-top: 6px; border-radius: 10px; background-color: var(--info-bg); border: 1px solid var(--info-border); color: var(--info-text);}
+    .info-msg {padding: 10px 12px; font-size: 0.875rem; margin-top: 6px; border-radius: 10px; background-color: var(--info-bg); border: 1px solid var(--info-border); color: var(--info-text);}
     .right{display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap}
     .summary{
       background:linear-gradient(180deg, rgba(255,255,255,0.32), rgba(255,255,255,0.1));
@@ -348,9 +348,9 @@
     .sample-type-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; border-radius: 14px; transition: background-color 0.2s, border-color 0.2s, transform .18s ease; border:1px solid transparent; }
     .sample-type-item.selected { background-color: var(--primary-light); border-color: rgba(14,124,102,0.24); }
     .sample-type-item:hover { transform: translateY(-1px); border-color: var(--border); }
-    .sample-type-item .add-type-btn { padding: 6px 10px; font-size: 0.9em; }
+    .sample-type-item .add-type-btn { padding: 10px 14px; font-size: 0.9em; }
 
-    .cases-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .cases-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
     .case-card {
       background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.52));
       border: 1px solid var(--border);
@@ -366,7 +366,33 @@
     }
     .case-card:hover{transform:translateY(-2px); box-shadow:var(--shadow)}
     .case-card.urine-card{border-left-color:#c97a1b}
-    .case-card-info { display: flex; flex-direction: column; gap: 4px; }
+    body.dark-mode .hero{
+      background:
+        linear-gradient(135deg, rgba(8,22,28,0.97), rgba(5,15,20,0.93)),
+        radial-gradient(circle at 18% 10%, rgba(100,209,178,.07), transparent 24%),
+        radial-gradient(circle at 100% 0%, rgba(100,209,178,.05), transparent 26%);
+      border-color:var(--border-strong);
+    }
+    body.dark-mode .hero::after{opacity:.04;}
+    body.dark-mode .case-card{background:linear-gradient(180deg, rgba(25,52,62,0.92), rgba(18,40,50,0.88)); border-color:var(--border-strong);}
+    body.dark-mode .case-card:hover{background:linear-gradient(180deg, rgba(30,62,74,0.96), rgba(22,50,62,0.92));}
+    body.dark-mode .summary{background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); border-color:var(--border-strong);}
+    body.dark-mode #historyKPI .card{background:linear-gradient(145deg, rgba(25,52,62,0.9), rgba(14,35,44,0.8));}
+    body.dark-mode .num-btn{background:var(--card); border-color:var(--border-strong);}
+    body.dark-mode .num-btn:hover{background:var(--primary-soft); border-color:rgba(100,209,178,.28);}
+    body.dark-mode table{background:rgba(10,24,30,0.6);}
+    body.dark-mode thead th{background:rgba(12,28,36,0.9);}
+    body.dark-mode .sample-type-selector{background:rgba(255,255,255,0.04);}
+    body.dark-mode .sample-type-item{border-color:var(--border);}
+    body.dark-mode .sample-type-item.selected{background-color:var(--primary-soft); border-color:rgba(100,209,178,0.24);}
+    body.dark-mode input, body.dark-mode select, body.dark-mode textarea{background:rgba(10,24,30,0.7); border-color:var(--border-strong);}
+    body.dark-mode .tube{background:rgba(255,255,255,0.04); border-color:var(--border-strong);}
+    body.dark-mode .sample-badge{color:var(--primary); background:rgba(100,209,178,0.14); border-color:rgba(100,209,178,0.22);}
+    body.dark-mode .sample-badge.urine{color:#e8c350; background:rgba(225,202,37,0.12); border-color:rgba(225,202,37,0.2);}
+    body.dark-mode .kind-badge.blood{color:#ff9999; background:rgba(177,34,31,0.2); border-color:rgba(177,34,31,0.3);}
+    body.dark-mode .kind-badge.urine{color:#e8c350; background:rgba(225,202,37,0.14); border-color:rgba(225,202,37,0.22);}
+    body.dark-mode .chip{background:var(--primary-soft); border-color:rgba(100,209,178,0.22);}
+    .case-card-info { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 0; overflow: hidden; }
     .case-card-code { font-weight: 800; font-size: 1.2em; color: var(--text); }
     .case-card-date, .case-card-tubes { font-size: 0.92em; color: var(--muted); }
     .case-card-tubes { font-weight: 700; }
@@ -383,7 +409,7 @@
       width:max-content;
       padding:4px 8px;
       border-radius:999px;
-      font-size:.72rem;
+      font-size:.75rem;
       font-weight:800;
       letter-spacing:.06em;
       text-transform:uppercase;
@@ -396,14 +422,14 @@
       background:rgba(225,202,37,.18);
       border-color:rgba(225,202,37,.28);
     }
-    .case-card-actions{display:flex; gap:8px; align-items:center; flex-shrink:0}
+    .case-card-actions{display:flex; flex-direction:row; gap:8px; align-items:center; flex-shrink:0}
     .case-card-add-btn {
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
       color: white;
       border: none;
       border-radius: 50%;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       flex-shrink: 0;
       box-shadow: 0 16px 24px -20px rgba(14,124,102,0.9);
     }
@@ -413,8 +439,8 @@
       color:white;
       border:none;
       border-radius:50%;
-      width:40px;
-      height:40px;
+      width:44px;
+      height:44px;
       flex-shrink:0;
       box-shadow:0 16px 24px -20px rgba(192,57,43,.9);
     }
@@ -443,8 +469,8 @@
       background:rgba(255,255,255,.42);
     }
     .num-btn {
-      min-width: 42px;
-      min-height: 38px;
+      min-width: 44px;
+      min-height: 44px;
       padding: 7px 12px;
       justify-content: center;
       background:var(--card-strong);
@@ -513,7 +539,7 @@
       text-align:left;
       border-bottom:1px solid var(--border);
       padding:12px 10px;
-      font-size:.78rem;
+      font-size:.82rem;
       text-transform:uppercase;
       letter-spacing:.06em;
       color:var(--muted);
@@ -572,6 +598,14 @@
     .kind-blood td:first-child, .kind-urine td:first-child{box-shadow: inset 4px 0 0 transparent}
     .kind-blood td:first-child{box-shadow: inset 4px 0 0 var(--primary)}
     .kind-urine td:first-child{box-shadow: inset 4px 0 0 #c97a1b}
+
+    @media (max-width: 1024px) and (min-width: 769px) {
+      main { padding: 12px 16px 40px; }
+      .hero { grid-template-columns: minmax(200px, 300px) 1fr; padding: 16px; }
+      .hero h1 { font-size: clamp(1.4rem, 3vw, 2.2rem); }
+      .row { gap: 16px; }
+      table { min-width: 600px; }
+    }
 
     @media (max-width: 768px) {
       body {
@@ -643,13 +677,14 @@
       body.dark-mode .right{background:rgba(7,24,29,.92)}
       .input-icon-btn{width:auto}
       .case-card-add-btn,
-      .case-card-discard-btn { width: 48px; height: 48px; }
+      .case-card-discard-btn { width: 40px; height: 40px; }
+      .case-card-actions { flex-direction: row; gap: 6px; }
       .tab{
-        min-height:52px;
+        min-height:56px;
         width:100%;
         padding:8px 6px;
         border-radius:14px;
-        font-size:.78rem;
+        font-size:.82rem;
         line-height:1.1;
         box-shadow:none;
         white-space:normal;
@@ -675,9 +710,9 @@
       .sample-type-item .add-type-btn{display:none}
       .num-shortcuts{display:grid; grid-template-columns:repeat(5,1fr); width:100%}
       .num-btn{width:100%}
-      .cases-grid{grid-template-columns:1fr; gap:12px}
+      .cases-grid{grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px}
       .case-card{align-items:flex-start; border-radius:18px; cursor:pointer; min-height:92px}
-      .case-card-actions{padding-top:2px}
+      .case-card-actions{padding-top:2px; flex-direction:row; align-self:flex-start;}
       .modal-bg{align-items:flex-end}
       .qr-modal .modal{
         width:100vw;
@@ -1233,14 +1268,15 @@
         </div>
         <div class="case-card-actions">
           <button class="case-card-add-btn addA" title="Agregar caso"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <button class="case-card-discard-btn discardA" title="Descartar sangre"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
         </div>`;
         grid.appendChild(card);
       });
     }
     document.getElementById('listA').addEventListener('click',(e)=>{
-      const item = e.target.closest('.case-card');
-      if(!item) return;
-      addA(item.dataset.code);
+      const item = e.target.closest('.case-card'); if(!item) return; const code = item.dataset.code;
+      if(e.target.closest('.discardA')) { discardBlood(code); return; }
+      addA(code);
     });
     document.getElementById('searchA').addEventListener('input', debounce((ev)=>renderListA(ev.target.value), 250));
     document.getElementById('searchA').addEventListener('keydown',(ev)=>{ if(ev.key==='Enter'){ ev.target.value=''; renderListA(''); } });
@@ -1387,6 +1423,13 @@
       run('uiDiscardUrine', {caseCode:code, purgeTimes:true}, ()=>{
         openModal('Orina descartada', `Caso ${code}: orina removida de pendientes.`);
         refreshCasesAndStatus(()=>renderListB());
+      });
+    }
+    function discardBlood(code){
+      if(!confirm(`¿Descartar sangre del caso ${code}? Esto pondrá los tubos EDTA y Suero en 0.`)) return;
+      run('uiDiscardBlood', {caseCode:code}, ()=>{
+        openModal('Sangre descartada', `Caso ${code}: sangre removida de pendientes.`);
+        refreshCasesAndStatus(()=>renderListA());
       });
     }
     document.getElementById('btnClearB').onclick = ()=>{ chosenB=[]; renderChipsB(); renderBlocksB(); toggleG1UrineBlock(); document.getElementById('p_g1u').value=''; document.getElementById('p_obs_b').value=''; if(document.getElementById('msg2b')) document.getElementById('msg2b').textContent=''; };
