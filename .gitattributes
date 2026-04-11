@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+# Keep binary assets untouched.
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.gif binary
+*.ico binary
+*.pdf binary

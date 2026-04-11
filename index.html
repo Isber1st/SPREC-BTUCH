@@ -117,6 +117,7 @@
       background: rgba(255,255,255,0.55);
       box-shadow: var(--shadow-soft);
       transition: all .18s ease;
+      min-height:44px;
     }
     .tab:hover{color:var(--text); border-color:var(--border-strong); transform:translateY(-1px)}
     .tab.active{
@@ -433,7 +434,7 @@
 
     .num-shortcuts {
       display: inline-grid;
-      grid-template-columns: repeat(4, minmax(42px, 1fr));
+      grid-template-columns: repeat(5, minmax(42px, 1fr));
       gap: 8px;
       margin-top: 10px;
       padding:6px;
@@ -573,7 +574,11 @@
     .kind-urine td:first-child{box-shadow: inset 4px 0 0 #c97a1b}
 
     @media (max-width: 768px) {
-      body { font-size: 16px; line-height: 1.5; }
+      body {
+        font-size: 16px;
+        line-height: 1.5;
+        padding-bottom: calc(150px + env(safe-area-inset-bottom));
+      }
       .row { grid-template-columns: 1fr; }
       header {padding: 10px 12px; gap:10px;}
       .brand-mark{padding:5px 8px; border-radius:13px}
@@ -582,46 +587,106 @@
       .header-left .title { display: none; }
       #meBox {display:none;}
       .tabs{
-        position:sticky;
-        top:61px;
-        z-index:15;
-        padding:10px 12px;
-        margin:0 -12px 8px;
-        background:linear-gradient(180deg, rgba(238,243,241,.96), rgba(238,243,241,.76));
-        backdrop-filter:blur(16px);
+        position:fixed;
+        left:0;
+        right:0;
+        bottom:0;
+        z-index:40;
+        display:grid;
+        grid-template-columns:repeat(4, minmax(0, 1fr));
+        gap:6px;
+        padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+        margin:0;
+        background:rgba(238,243,241,.94);
+        border-top:1px solid var(--border);
+        box-shadow:0 -18px 34px -28px rgba(14,42,48,.6);
+        backdrop-filter:blur(18px);
+        overflow:visible;
       }
-      body.dark-mode .tabs{background:linear-gradient(180deg, rgba(7,24,29,.96), rgba(7,24,29,.74))}
+      body.dark-mode .tabs{background:rgba(7,24,29,.94)}
       main {padding: 0 12px 28px;}
       .hero{
-        grid-template-columns:1fr;
-        gap:14px;
-        margin:8px 0 12px;
-        padding:14px;
-        border-radius:24px;
+        display:block;
+        margin:8px 0 10px;
+        padding:10px;
+        border-radius:18px;
       }
-      .hero-logo{padding:12px; border-radius:18px}
-      .hero h1{font-size:2rem}
-      .hero p{font-size:.95rem}
-      .hero-actions{gap:8px}
-      .status-pill{font-size:.8rem; padding:8px 10px}
+      .hero::after{display:none}
+      .hero-logo{display:none}
+      .hero h1{font-size:1.05rem; line-height:1.08; letter-spacing:0}
+      .hero p, .hero-actions{display:none}
+      .eyebrow{margin-bottom:4px; padding:4px 7px; font-size:.62rem; letter-spacing:.05em}
       body:not([data-active-tab="t1"]) .hero{display:none}
-      .card { padding: 16px; border-radius:20px; margin-bottom:12px; }
+      .card {
+        padding: 16px;
+        border-radius:18px;
+        margin-bottom:12px;
+        box-shadow:0 8px 22px -20px rgba(14,42,48,.45);
+      }
       input,select,textarea{min-height:48px}
       .time-control{grid-template-columns:1fr auto; max-width:none}
-      .btn, .btn-ghost { width:100%; padding: 13px 16px; }
-      .btn-now{width:auto; min-width:132px}
-      .right{justify-content:stretch}
+      .btn, .btn-ghost { width:100%; min-height:48px; padding: 13px 16px; border-radius:12px; }
+      .btn-now{width:auto; min-width:116px}
+      .right{
+        position:sticky;
+        bottom:calc(76px + env(safe-area-inset-bottom));
+        z-index:30;
+        justify-content:stretch;
+        padding:10px;
+        margin:14px -8px -8px;
+        background:rgba(238,243,241,.92);
+        border:1px solid var(--border);
+        border-radius:16px;
+        box-shadow:0 -14px 28px -24px rgba(14,42,48,.7);
+        backdrop-filter:blur(16px);
+      }
+      body.dark-mode .right{background:rgba(7,24,29,.92)}
       .input-icon-btn{width:auto}
-      .case-card-add-btn { width: 40px; height: 40px; }
-      .tab{padding:10px 14px}
+      .case-card-add-btn,
+      .case-card-discard-btn { width: 48px; height: 48px; }
+      .tab{
+        min-height:52px;
+        width:100%;
+        padding:8px 6px;
+        border-radius:14px;
+        font-size:.78rem;
+        line-height:1.1;
+        box-shadow:none;
+        white-space:normal;
+      }
       h2{font-size:1.35rem}
-      .sample-type-item{align-items:flex-start; flex-direction:column; gap:10px}
-      .sample-type-item .add-type-btn{width:100%}
-      .num-shortcuts{display:grid; grid-template-columns:repeat(4,1fr); width:100%}
+      .sample-type-selector{padding:8px; border-radius:16px}
+      .sample-type-item{
+        align-items:flex-start;
+        flex-direction:column;
+        gap:6px;
+        padding:14px;
+        border:1px solid var(--border);
+        background:rgba(255,255,255,.42);
+        cursor:pointer;
+      }
+      .sample-type-item::after{
+        content:"Tocar para seleccionar";
+        color:var(--muted);
+        font-size:.78rem;
+        font-weight:700;
+      }
+      .sample-type-item.selected::after{content:"Seleccionado"; color:var(--primary-strong)}
+      .sample-type-item .add-type-btn{display:none}
+      .num-shortcuts{display:grid; grid-template-columns:repeat(5,1fr); width:100%}
       .num-btn{width:100%}
       .cases-grid{grid-template-columns:1fr; gap:12px}
-      .case-card{align-items:flex-start; border-radius:20px}
+      .case-card{align-items:flex-start; border-radius:18px; cursor:pointer; min-height:92px}
       .case-card-actions{padding-top:2px}
+      .modal-bg{align-items:flex-end}
+      .qr-modal .modal{
+        width:100vw;
+        max-width:none;
+        min-height:100dvh;
+        border-radius:0;
+        padding:18px 16px calc(18px + env(safe-area-inset-bottom));
+      }
+      .qr-modal #qr-reader{min-height:320px}
       #historyKPI{grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px}
       #historyKPI .card{min-height:88px; padding:14px}
       .history-kpi-card .kpi-value{font-size:1.4rem}
@@ -689,12 +754,12 @@
     </div>
   </header>
   
-  <div class="tabs">
-    <div class="tab active" data-tab="t1">Etapa 1</div>
-    <div class="tab" data-tab="t2a">Etapa 2 · Plasma/Suero</div>
-    <div class="tab" data-tab="t2b">Etapa 2 · Orina</div>
-    <div class="tab" data-tab="t3">Historial</div>
-  </div>
+  <nav class="tabs" aria-label="Navegacion principal">
+    <button type="button" class="tab active" data-tab="t1" aria-current="page">Registro</button>
+    <button type="button" class="tab" data-tab="t2a">Sangre</button>
+    <button type="button" class="tab" data-tab="t2b">Orina</button>
+    <button type="button" class="tab" data-tab="t3">Historial</button>
+  </nav>
 
   <main>
     <section class="hero" aria-label="Presentacion de SPREC Fluidos">
@@ -758,6 +823,7 @@
                 <label for="c_edta"># Tubos tapa lila (0–8)</label>
                 <input id="c_edta" type="number" min="0" max="8" value="0">
                 <div class="num-shortcuts">
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_edta', 0)">0</button>
                     <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_edta', 1)">1</button>
                     <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_edta', 2)">2</button>
                     <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_edta', 3)">3</button>
@@ -768,6 +834,7 @@
                 <label for="c_ser"># Tubos tapa roja (0–8)</label>
                 <input id="c_ser"  type="number" min="0" max="8" value="0">
                 <div class="num-shortcuts">
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_ser', 0)">0</button>
                     <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_ser', 1)">1</button>
                     <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_ser', 2)">2</button>
                     <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_ser', 3)">3</button>
@@ -789,6 +856,7 @@
                 <label for="c_uri"># Frascos Orina (0–8)</label>
                 <input id="c_uri" type="number" min="0" max="8" value="0">
                 <div class="num-shortcuts">
+                    <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_uri', 0)">0</button>
                     <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_uri', 1)">1</button>
                     <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_uri', 2)">2</button>
                     <button type="button" class="btn-ghost num-btn" onclick="setInputValue('c_uri', 3)">3</button>
@@ -901,7 +969,7 @@
     </div>
   </div>
 
-  <div id="qrModal" class="modal-bg">
+  <div id="qrModal" class="modal-bg qr-modal">
     <div class="modal">
       <h3>Escanear Código QR</h3>
       <p>Apunta la cámara de tu dispositivo al código QR del caso.</p>
@@ -938,6 +1006,9 @@
         if (input) {
             input.value = value;
         }
+    }
+    function numShortcutHtml(inputId) {
+      return [0, 1, 2, 3, 4].map(n => `<button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', ${n})">${n}</button>`).join('');
     }
     function debounce(fn, wait=250){ 
       let t; 
@@ -986,9 +1057,13 @@
     /* ====== Lógica de Pestañas ====== */
     document.querySelectorAll('.tab').forEach(t=>{
       t.addEventListener('click', ()=>{
-        document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(x=>{
+          x.classList.remove('active');
+          x.removeAttribute('aria-current');
+        });
         document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
         t.classList.add('active'); document.getElementById(t.dataset.tab).classList.add('active');
+        t.setAttribute('aria-current', 'page');
         document.body.dataset.activeTab = t.dataset.tab;
         if(t.dataset.tab==='t3') loadHistory(); 
         if(t.dataset.tab==='t2a') loadPendingA(); 
@@ -1046,7 +1121,8 @@
     
     scanQrBtn.addEventListener('click', () => {
         qrModal.style.display = 'flex';
-        html5QrCode.start( { facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess, onScanFailure)
+        const qrSize = Math.min(Math.floor(window.innerWidth * 0.82), 360);
+        html5QrCode.start( { facingMode: "environment" }, { fps: 10, qrbox: { width: qrSize, height: qrSize } }, onScanSuccess, onScanFailure)
         .catch(err => {
             alert(`No se pudo iniciar la cámara. Revisa los permisos en tu navegador. Error: ${err}`);
             qrModal.style.display = 'none';
@@ -1161,7 +1237,11 @@
         grid.appendChild(card);
       });
     }
-    document.getElementById('listA').addEventListener('click',(e)=>{ if(e.target && e.target.closest('.addA')){ addA(e.target.closest('.case-card').dataset.code); } });
+    document.getElementById('listA').addEventListener('click',(e)=>{
+      const item = e.target.closest('.case-card');
+      if(!item) return;
+      addA(item.dataset.code);
+    });
     document.getElementById('searchA').addEventListener('input', debounce((ev)=>renderListA(ev.target.value), 250));
     document.getElementById('searchA').addEventListener('keydown',(ev)=>{ if(ev.key==='Enter'){ ev.target.value=''; renderListA(''); } });
     
@@ -1195,10 +1275,7 @@
             html += `<div class="tube"><div><strong>Tubo ${t}</strong></div><label>N° alícuotas (0–9)</label>
                      <input type="number" min="0" max="9" value="0" id="${inputId}">
                      <div class="num-shortcuts">
-                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 1)">1</button>
-                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 2)">2</button>
-                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 3)">3</button>
-                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 4)">4</button>
+                        ${numShortcutHtml(inputId)}
                      </div>
                      <div style="margin-top:8px"><label><input type="checkbox" id="ubc-${code}-${t}"> Obtener BC</label></div></div>`;
           }
@@ -1211,10 +1288,7 @@
             html += `<div class="tube"><div><strong>Tubo ${t}</strong></div><label>N° alícuotas (0–9)</label>
                      <input type="number" min="0" max="9" value="0" id="${inputId}">
                      <div class="num-shortcuts">
-                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 1)">1</button>
-                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 2)">2</button>
-                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 3)">3</button>
-                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 4)">4</button>
+                        ${numShortcutHtml(inputId)}
                      </div>
                      </div>`;
           }
@@ -1269,8 +1343,8 @@
     }
     document.getElementById('listB').addEventListener('click',(e)=>{
       const item = e.target.closest('.case-card'); if(!item) return; const code = item.dataset.code;
-      if(e.target.closest('.addB')) addB(code);
-      if(e.target.closest('.discardB')) discardUrine(code);
+      if(e.target.closest('.discardB')) { discardUrine(code); return; }
+      addB(code);
     });
     document.getElementById('searchB').addEventListener('input', debounce((ev)=>renderListB(ev.target.value), 250));
     document.getElementById('searchB').addEventListener('keydown',(ev)=>{ if(ev.key==='Enter'){ ev.target.value=''; renderListB(''); } });
@@ -1298,10 +1372,7 @@
           html += `<div class="tube"><div><strong>Frasco ${t}</strong></div><label style="margin-top:6px">N° alícuotas (0–9)</label>
                    <input type="number" min="0" max="9" value="0" id="${inputId}">
                    <div class="num-shortcuts">
-                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 1)">1</button>
-                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 2)">2</button>
-                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 3)">3</button>
-                        <button type="button" class="btn-ghost num-btn" onclick="setInputValue('${inputId}', 4)">4</button>
+                        ${numShortcutHtml(inputId)}
                    </div>
                    </div>`;
         }
