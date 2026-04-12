@@ -352,6 +352,42 @@
     .sample-type-item .add-type-btn { padding: 10px 14px; font-size: 0.9em; }
 
     .cases-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .processing-layout{
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) minmax(340px, 0.95fr);
+      gap:22px;
+      align-items:start;
+    }
+    .search-row.full{max-width:720px; margin-bottom:14px}
+    #t2a > .card{
+      display:grid;
+      grid-template-columns:minmax(0, 1fr) minmax(340px, 0.95fr);
+      gap:16px 22px;
+      align-items:start;
+    }
+    #t2a > .card > h2,
+    #t2a > .card > .search-row.full{grid-column:1 / -1}
+    #t2a .processing-layout{display:contents}
+    #t2a .processing-layout > div:first-child{grid-column:1; grid-row:3 / span 5; min-width:0}
+    #t2a .processing-layout > div:first-child .search-row{display:none}
+    #t2a .processing-layout > div:nth-child(2),
+    #t2a #d1-block-A,
+    #t2a #aliquot-block-A,
+    #t2a #e1g1-block-A{grid-column:2; min-width:0}
+    #t2a > .card > .divider{display:none}
+    #t2a .processing-layout > div:nth-child(2),
+    #t2a #d1-block-A,
+    #t2a #e1g1-block-A{
+      padding:16px;
+      border:1px solid var(--border);
+      border-radius:18px;
+      background:rgba(255,255,255,0.34);
+    }
+    body.dark-mode #t2a #d1-block-A,
+    body.dark-mode #t2a #e1g1-block-A{background:rgba(255,255,255,0.04); border-color:var(--border-strong)}
+    #t2a #d1-block-A .row,
+    #t2a #e1g1-block-A .row{grid-template-columns:1fr; gap:12px}
+    #t2a #d1-block-A .row > div:empty{display:none}
     .case-card {
       background: linear-gradient(180deg, rgba(255,255,255,0.72), rgba(255,255,255,0.52));
       border: 1px solid var(--border);
@@ -736,6 +772,16 @@
       .num-shortcuts{display:grid; grid-template-columns:repeat(5,1fr); width:100%}
       .num-btn{width:100%}
       .cases-grid{grid-template-columns:repeat(auto-fill, minmax(160px, 1fr)); gap:12px}
+      .processing-layout{grid-template-columns:1fr; gap:14px}
+      .search-row.full{max-width:none}
+      #t2a > .card{display:block}
+      #t2a .processing-layout{display:flex; flex-direction:column; gap:12px}
+      #t2a .processing-layout > div:nth-child(2){order:-1}
+      #t2a .processing-layout > div:first-child .search-row{display:none}
+      #t2a .processing-layout > div:nth-child(2),
+      #t2a #d1-block-A,
+      #t2a #e1g1-block-A{padding:12px; border-radius:16px; margin-top:12px}
+      #t2a #aliquot-block-A{margin-top:12px}
       .case-card{align-items:flex-start; border-radius:18px; cursor:pointer; min-height:92px}
       .case-card-actions{padding-top:2px; flex-direction:row; align-self:flex-start;}
       .modal-bg{align-items:flex-end}
@@ -939,9 +985,9 @@
     <section id="t2a" class="panel">
       <div class="card">
         <h2>Procesar Plasma/Suero</h2>
-        <div class="row">
-          <div>
-            <div class="search-row"><input id="searchA" type="text" placeholder="Buscar caso… (Enter para limpiar)"></div>
+        <div class="search-row full"><input id="searchA" type="text" placeholder="Buscar caso... (Enter para limpiar)"></div>
+        <div class="processing-layout">
+          <div class="processing-main">
             <label>Casos pendientes (sangre)</label>
             <div class="cases-grid" id="listA"></div>
           </div>
