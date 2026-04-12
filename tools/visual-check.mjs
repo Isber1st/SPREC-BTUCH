@@ -14,6 +14,8 @@ const viewports = [
   { name: 'desktop', width: 1440, height: 1000 },
 ];
 
+const themes = ['light', 'dark'];
+
 const cases = [
   { codigoCaso: '01250007', tColSangre: '12-04-26 08:55', tColOrina0: '', mes: 'Abril', nTubosEDTA: 1, nTubosSERUM: 0, nTubosURINE: 0, creado: '12-04-26 09:00' },
   { codigoCaso: '11250009', tColSangre: '11-04-26 16:42', tColOrina0: '', mes: 'Abril', nTubosEDTA: 1, nTubosSERUM: 0, nTubosURINE: 0, creado: '11-04-26 16:45' },
@@ -67,7 +69,7 @@ const historyRows = [
 ];
 
 function mockAppsScript(mockData) {
-  const { cases, status, historyRows } = mockData;
+  const { cases, status, historyRows, theme = 'light' } = mockData;
   const clone = (value) => JSON.parse(JSON.stringify(value));
 
   const responseFor = (method, args) => {
@@ -117,20 +119,21 @@ function mockAppsScript(mockData) {
   window.confirm = () => true;
   window.alert = (message) => console.warn(`alert: ${message}`);
   try {
-    window.localStorage.setItem('theme', 'light');
+    window.localStorage.setItem('theme', theme);
   } catch (_error) {
     // Local storage can be unavailable in some isolated browser contexts.
   }
 }
 
-async function createPage(browser, viewport) {
+async function createPage(browser, viewport, theme) {
   const context = await browser.newContext({
     viewport: { width: viewport.width, height: viewport.height },
     deviceScaleFactor: viewport.name === 'mobile' ? 2 : 1,
     isMobile: viewport.name === 'mobile',
     hasTouch: viewport.name === 'mobile',
+    colorScheme: theme,
   });
-  await context.addInitScript(mockAppsScript, { cases, status, historyRows });
+  await context.addInitScript(mockAppsScript, { cases, status, historyRows, theme });
   const page = await context.newPage();
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
@@ -143,7 +146,7 @@ async function createPage(browser, viewport) {
     return meBox && meBox.textContent && !meBox.textContent.includes('Cargando');
   }, null, { timeout: 7000 });
   if (pageErrors.length) {
-    throw new Error(`Errores de pagina en ${viewport.name}:\n${pageErrors.join('\n')}`);
+    throw new Error(`Errores de pagina en ${theme}/${viewport.name}:\n${pageErrors.join('\n')}`);
   }
   return { context, page };
 }
@@ -241,6 +244,51 @@ async function ensureTabsBelowHeader(page, label) {
   }
 }
 
+async function ensureDarkModeReadableText(page, label) {
+  const lowContrast = await page.evaluate(() => {
+    if (!document.body.classList.contains('dark-mode')) return [];
+    const selectors = [
+      '.panel.active h2',
+      '.panel.active h3',
+      '.panel.active h4',
+      '.panel.active label',
+      '.panel.active .case-card-code',
+      '.panel.active .case-card-meta',
+      '.panel.active .sample-type-item',
+      '.panel.active .history-table tbody td',
+    ].join(',');
+
+    const parseRgb = (value) => {
+      const match = value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      return match ? match.slice(1, 4).map(Number) : null;
+    };
+
+    return [...document.querySelectorAll(selectors)]
+      .filter((element) => {
+        const rect = element.getBoundingClientRect();
+        const styles = window.getComputedStyle(element);
+        return rect.width > 0 && rect.height > 0 && styles.visibility !== 'hidden' && styles.display !== 'none';
+      })
+      .map((element) => {
+        const color = window.getComputedStyle(element).color;
+        const rgb = parseRgb(color);
+        if (!rgb) return null;
+        const brightestChannel = Math.max(...rgb);
+        return brightestChannel >= 110 ? null : {
+          tag: element.tagName.toLowerCase(),
+          selectorHint: element.className || element.id || element.textContent.trim().slice(0, 32),
+          color,
+          text: element.textContent.trim().replace(/\s+/g, ' ').slice(0, 48),
+        };
+      })
+      .filter(Boolean);
+  });
+
+  if (lowContrast.length) {
+    throw new Error(`${label}: texto oscuro en modo oscuro ${JSON.stringify(lowContrast)}`);
+  }
+}
+
 async function ensureModalVisible(page, label) {
   await page.waitForSelector('#modalBG', { state: 'visible', timeout: 5000 });
   const modal = await page.locator('.app-modal').first().boundingBox();
@@ -249,8 +297,8 @@ async function ensureModalVisible(page, label) {
   }
 }
 
-async function screenshot(page, viewportName, stateName) {
-  const file = path.join(screenshotDir, `${viewportName}-${stateName}.png`);
+async function screenshot(page, themeName, viewportName, stateName) {
+  const file = path.join(screenshotDir, `${themeName}-${viewportName}-${stateName}.png`);
   const scroll = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(80);
@@ -258,55 +306,60 @@ async function screenshot(page, viewportName, stateName) {
   await page.evaluate(({ x, y }) => window.scrollTo(x, y), scroll);
 }
 
-async function runScenario(browser, viewport) {
-  const { context, page } = await createPage(browser, viewport);
+async function runScenario(browser, viewport, theme) {
+  const labelPrefix = `${theme} ${viewport.name}`;
+  const { context, page } = await createPage(browser, viewport, theme);
   try {
-    await ensureNoHorizontalOverflow(page, `${viewport.name} registro`);
-    if (viewport.name === 'mobile') await ensureMobileRegistrationActionsAreInline(page, `${viewport.name} registro`);
-    await screenshot(page, viewport.name, 'registro');
+    await ensureNoHorizontalOverflow(page, `${labelPrefix} registro`);
+    if (viewport.name === 'mobile') await ensureMobileRegistrationActionsAreInline(page, `${labelPrefix} registro`);
+    if (theme === 'dark') await ensureDarkModeReadableText(page, `${labelPrefix} registro`);
+    await screenshot(page, theme, viewport.name, 'registro');
 
     await page.fill('#c_case', '99250001');
     await page.click('#selector-edta');
     await page.fill('#c_coll_s', '2026-04-12T11:43');
     await page.fill('#c_edta', '1');
-    if (viewport.name === 'mobile') await ensureMobileNowButtonsStacked(page, `${viewport.name} registro`);
+    if (viewport.name === 'mobile') await ensureMobileNowButtonsStacked(page, `${labelPrefix} registro`);
     await page.click('#btnSave');
-    await ensureModalVisible(page, `${viewport.name} guardar`);
-    await screenshot(page, viewport.name, 'modal-guardar');
+    await ensureModalVisible(page, `${labelPrefix} guardar`);
+    await screenshot(page, theme, viewport.name, 'modal-guardar');
     await page.click('#modalOK');
 
     await page.click('.tab[data-tab="t2a"]');
     await page.waitForSelector('#listA .case-card');
-    if (viewport.name !== 'mobile') await ensureTabsBelowHeader(page, `${viewport.name} tabs sangre`);
+    if (viewport.name !== 'mobile') await ensureTabsBelowHeader(page, `${labelPrefix} tabs sangre`);
     await page.click('#listA .case-card:first-child [data-action="add"]');
     await page.fill('#p_d1', '2026-04-12T11:00');
     await page.fill('#p_e1', '2026-04-12T11:20');
     await page.fill('#p_g1s', '2026-04-12T11:45');
-    if (viewport.name === 'mobile') await ensureMobileNowButtonsStacked(page, `${viewport.name} sangre`);
-    await ensureCheckboxesCompact(page, `${viewport.name} sangre`);
-    await ensureNoHorizontalOverflow(page, `${viewport.name} sangre`);
-    await screenshot(page, viewport.name, 'sangre');
+    if (viewport.name === 'mobile') await ensureMobileNowButtonsStacked(page, `${labelPrefix} sangre`);
+    await ensureCheckboxesCompact(page, `${labelPrefix} sangre`);
+    await ensureNoHorizontalOverflow(page, `${labelPrefix} sangre`);
+    if (theme === 'dark') await ensureDarkModeReadableText(page, `${labelPrefix} sangre`);
+    await screenshot(page, theme, viewport.name, 'sangre');
     await page.click('#btnGenA');
-    await ensureModalVisible(page, `${viewport.name} generar sangre`);
+    await ensureModalVisible(page, `${labelPrefix} generar sangre`);
     await page.click('#modalOK');
 
     await page.click('.tab[data-tab="t2b"]');
     await page.waitForSelector('#listB .case-card');
-    if (viewport.name !== 'mobile') await ensureTabsBelowHeader(page, `${viewport.name} tabs orina`);
+    if (viewport.name !== 'mobile') await ensureTabsBelowHeader(page, `${labelPrefix} tabs orina`);
     await page.click('#listB .case-card:first-child [data-action="add"]');
     await page.fill('#p_g1u', '2026-04-12T12:05');
-    if (viewport.name === 'mobile') await ensureMobileNowButtonsStacked(page, `${viewport.name} orina`);
-    await ensureNoHorizontalOverflow(page, `${viewport.name} orina`);
-    await screenshot(page, viewport.name, 'orina');
+    if (viewport.name === 'mobile') await ensureMobileNowButtonsStacked(page, `${labelPrefix} orina`);
+    await ensureNoHorizontalOverflow(page, `${labelPrefix} orina`);
+    if (theme === 'dark') await ensureDarkModeReadableText(page, `${labelPrefix} orina`);
+    await screenshot(page, theme, viewport.name, 'orina');
     await page.click('#btnGenB');
-    await ensureModalVisible(page, `${viewport.name} generar orina`);
+    await ensureModalVisible(page, `${labelPrefix} generar orina`);
     await page.click('#modalOK');
 
     await page.click('.tab[data-tab="t3"]');
     await page.waitForSelector('#histTbody tr');
-    if (viewport.name !== 'mobile') await ensureTabsBelowHeader(page, `${viewport.name} tabs historial`);
-    await ensureNoHorizontalOverflow(page, `${viewport.name} historial`);
-    await screenshot(page, viewport.name, 'historial');
+    if (viewport.name !== 'mobile') await ensureTabsBelowHeader(page, `${labelPrefix} tabs historial`);
+    await ensureNoHorizontalOverflow(page, `${labelPrefix} historial`);
+    if (theme === 'dark') await ensureDarkModeReadableText(page, `${labelPrefix} historial`);
+    await screenshot(page, theme, viewport.name, 'historial');
   } finally {
     await context.close();
   }
@@ -316,9 +369,11 @@ await mkdir(screenshotDir, { recursive: true });
 const browser = await chromium.launch({ headless: true });
 
 try {
-  for (const viewport of viewports) {
-    console.log(`Validando ${viewport.name} (${viewport.width}x${viewport.height})...`);
-    await runScenario(browser, viewport);
+  for (const theme of themes) {
+    for (const viewport of viewports) {
+      console.log(`Validando ${theme}/${viewport.name} (${viewport.width}x${viewport.height})...`);
+      await runScenario(browser, viewport, theme);
+    }
   }
   console.log(`OK: capturas generadas en ${path.relative(projectRoot, screenshotDir)}`);
 } finally {
