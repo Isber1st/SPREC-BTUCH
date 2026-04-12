@@ -10,7 +10,7 @@ Push-Location $projectRoot
 try {
   & (Join-Path $PSScriptRoot "backup-appscript.ps1") -BackupRoot $BackupRoot
   git status --short
-  clasp push
+  clasp.cmd push
 }
 finally {
   Pop-Location
