@@ -1,3 +1,8 @@
 backups/
 logo_biobanco_web.jpg
 .claude/
+
+node_modules/
+test-results/
+playwright-report/
+tools/screenshots/

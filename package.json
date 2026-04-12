@@ -1,0 +1,24 @@
+{
+  "name": "sprec-btuch",
+  "version": "1.0.0",
+  "description": "Aplicación web en Google Apps Script para registrar casos y procesar muestras SPREC del Biobanco de la Universidad de Chile.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Isber1st/SPREC-BTUCH.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Isber1st/SPREC-BTUCH/issues"
+  },
+  "homepage": "https://github.com/Isber1st/SPREC-BTUCH#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.59.1"
+  }
+}
