@@ -278,6 +278,25 @@
       box-shadow: 0 0 0 4px var(--primary-soft);
       outline:none;
     }
+    input[type="checkbox"]{
+      width:18px;
+      min-width:18px;
+      height:18px;
+      min-height:18px;
+      padding:0;
+      border-radius:4px;
+      box-shadow:none;
+      accent-color:var(--primary);
+      flex:0 0 auto;
+    }
+    .checkbox-label{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      margin:0;
+      cursor:pointer;
+    }
+    .checkbox-label input{margin:0}
     .time-control{
       display:grid;
       grid-template-columns:minmax(0, 1fr) max-content;
@@ -897,6 +916,17 @@
         backdrop-filter:blur(16px);
       }
       body.dark-mode .right{background:rgba(7,24,29,.92)}
+      #t1 .right{
+        position:static;
+        bottom:auto;
+        z-index:auto;
+        margin:16px 0 0;
+        padding:0;
+        background:transparent;
+        border:0;
+        box-shadow:none;
+        backdrop-filter:none;
+      }
       .input-icon-btn{width:auto}
       .case-card-action-btn,
       .case-card-add-btn,
@@ -1400,6 +1430,7 @@
         if(t.dataset.tab==='t3') loadHistory(); 
         if(t.dataset.tab==='t2a') loadPendingA(); 
         if(t.dataset.tab==='t2b') loadPendingB();
+        window.scrollTo({top:0, left:0, behavior:'auto'});
         updateSelectionDock();
       });
     });
@@ -1613,7 +1644,7 @@
                      <div class="num-shortcuts">
                         ${numShortcutHtml(inputId)}
                      </div>
-                     <div style="margin-top:8px"><label><input type="checkbox" id="ubc-${code}-${t}"> Obtener BC</label></div></div>`;
+                     <div style="margin-top:8px"><label class="checkbox-label"><input type="checkbox" id="ubc-${code}-${t}">Obtener BC</label></div></div>`;
           }
           html += `</div>`;
         } else if (c.nTubosEDTA > 0) { html += `<div class="divider"></div><p class="muted">Plasma de este caso ya fue procesado.</p>`; }

@@ -189,6 +189,58 @@ async function ensureMobileNowButtonsStacked(page, label) {
   }
 }
 
+async function ensureMobileRegistrationActionsAreInline(page, label) {
+  const position = await page.evaluate(() => {
+    const actions = document.querySelector('#t1 .right');
+    return actions ? window.getComputedStyle(actions).position : null;
+  });
+  if (position !== 'static') {
+    throw new Error(`${label}: acciones de registro mobile no estan en flujo normal (${position})`);
+  }
+}
+
+async function ensureCheckboxesCompact(page, label) {
+  const oversized = await page.evaluate(() => {
+    return [...document.querySelectorAll('input[type="checkbox"]')]
+      .filter((checkbox) => {
+        const rect = checkbox.getBoundingClientRect();
+        const styles = window.getComputedStyle(checkbox);
+        return rect.width > 0 && rect.height > 0 && styles.visibility !== 'hidden' && styles.display !== 'none';
+      })
+      .map((checkbox) => {
+        const rect = checkbox.getBoundingClientRect();
+        return rect.width <= 28 && rect.height <= 28 ? null : {
+          id: checkbox.id,
+          width: rect.width,
+          height: rect.height,
+        };
+      })
+      .filter(Boolean);
+  });
+  if (oversized.length) {
+    throw new Error(`${label}: checkbox sobredimensionado ${JSON.stringify(oversized)}`);
+  }
+}
+
+async function ensureTabsBelowHeader(page, label) {
+  const metrics = await page.evaluate(() => {
+    const header = document.querySelector('header');
+    const tabs = document.querySelector('.tabs');
+    if (!header || !tabs) return null;
+    const headerRect = header.getBoundingClientRect();
+    const tabsRect = tabs.getBoundingClientRect();
+    return {
+      headerBottom: headerRect.bottom,
+      tabsTop: tabsRect.top,
+      scrollY: window.scrollY,
+    };
+  });
+  if (!metrics) throw new Error(`${label}: no se pudieron medir header/tabs`);
+  if (metrics.tabsTop < metrics.headerBottom - 2) {
+    throw new Error(`${label}: tabs bajo header ${JSON.stringify(metrics)}`);
+  }
+}
+
 async function ensureModalVisible(page, label) {
   await page.waitForSelector('#modalBG', { state: 'visible', timeout: 5000 });
   const modal = await page.locator('.app-modal').first().boundingBox();
@@ -199,13 +251,18 @@ async function ensureModalVisible(page, label) {
 
 async function screenshot(page, viewportName, stateName) {
   const file = path.join(screenshotDir, `${viewportName}-${stateName}.png`);
+  const scroll = await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY }));
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(80);
   await page.screenshot({ path: file, fullPage: true });
+  await page.evaluate(({ x, y }) => window.scrollTo(x, y), scroll);
 }
 
 async function runScenario(browser, viewport) {
   const { context, page } = await createPage(browser, viewport);
   try {
     await ensureNoHorizontalOverflow(page, `${viewport.name} registro`);
+    if (viewport.name === 'mobile') await ensureMobileRegistrationActionsAreInline(page, `${viewport.name} registro`);
     await screenshot(page, viewport.name, 'registro');
 
     await page.fill('#c_case', '99250001');
@@ -220,11 +277,13 @@ async function runScenario(browser, viewport) {
 
     await page.click('.tab[data-tab="t2a"]');
     await page.waitForSelector('#listA .case-card');
+    if (viewport.name !== 'mobile') await ensureTabsBelowHeader(page, `${viewport.name} tabs sangre`);
     await page.click('#listA .case-card:first-child [data-action="add"]');
     await page.fill('#p_d1', '2026-04-12T11:00');
     await page.fill('#p_e1', '2026-04-12T11:20');
     await page.fill('#p_g1s', '2026-04-12T11:45');
     if (viewport.name === 'mobile') await ensureMobileNowButtonsStacked(page, `${viewport.name} sangre`);
+    await ensureCheckboxesCompact(page, `${viewport.name} sangre`);
     await ensureNoHorizontalOverflow(page, `${viewport.name} sangre`);
     await screenshot(page, viewport.name, 'sangre');
     await page.click('#btnGenA');
@@ -233,6 +292,7 @@ async function runScenario(browser, viewport) {
 
     await page.click('.tab[data-tab="t2b"]');
     await page.waitForSelector('#listB .case-card');
+    if (viewport.name !== 'mobile') await ensureTabsBelowHeader(page, `${viewport.name} tabs orina`);
     await page.click('#listB .case-card:first-child [data-action="add"]');
     await page.fill('#p_g1u', '2026-04-12T12:05');
     if (viewport.name === 'mobile') await ensureMobileNowButtonsStacked(page, `${viewport.name} orina`);
@@ -244,6 +304,7 @@ async function runScenario(browser, viewport) {
 
     await page.click('.tab[data-tab="t3"]');
     await page.waitForSelector('#histTbody tr');
+    if (viewport.name !== 'mobile') await ensureTabsBelowHeader(page, `${viewport.name} tabs historial`);
     await ensureNoHorizontalOverflow(page, `${viewport.name} historial`);
     await screenshot(page, viewport.name, 'historial');
   } finally {
