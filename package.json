@@ -4,8 +4,8 @@
   "description": "Aplicación web en Google Apps Script para registrar casos y procesar muestras SPREC del Biobanco de la Universidad de Chile.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "visual:check": "node tools/visual-check.mjs"
   },
   "repository": {
     "type": "git",
