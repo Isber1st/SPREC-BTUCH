@@ -555,10 +555,10 @@
 
     .modal-bg{position:fixed; inset:0; background:rgba(0,0,0,.35); display:none; align-items:center; justify-content:center; z-index:50}
     body.dark-mode .modal-bg{background:rgba(0,0,0,.65);}
-    .modal{background:var(--card); border-radius:22px; border:1px solid var(--border); width:520px; max-width:92vw; padding:24px; box-shadow: var(--shadow);}
-    .modal h3{margin:0 0 8px} 
-    .modal p{margin:0 0 16px; color:var(--muted)}
-    .modal .actions{display:flex; justify-content:flex-end; gap:12px}
+    .app-modal{background:var(--card); border-radius:22px; border:1px solid var(--border); width:520px; max-width:92vw; padding:24px; box-shadow: var(--shadow);}
+    .app-modal h3{margin:0 0 8px}
+    .app-modal p{margin:0 0 16px; color:var(--muted)}
+    .app-modal .actions{display:flex; justify-content:flex-end; gap:12px}
 
     #qr-reader { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
 
@@ -978,7 +978,7 @@
       .selection-dock-copy strong{font-size:.9rem}
       .selection-dock-btn{min-height:40px; width:auto; padding:9px 10px; border-radius:12px; font-size:.82rem}
       .modal-bg{align-items:flex-end}
-      .qr-modal .modal{
+      .qr-modal .app-modal{
         width:100vw;
         max-width:none;
         min-height:100dvh;
@@ -1034,7 +1034,7 @@
         white-space:normal;
         text-align:right;
       }
-      .modal{padding:18px; border-radius:22px}
+      .app-modal{padding:18px; border-radius:22px}
     }
 
     @media (max-width: 420px) {
@@ -1278,14 +1278,14 @@
   </div>
   
   <div id="modalBG" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalBody">
-    <div class="modal">
+    <div class="app-modal">
       <h3 id="modalTitle">Listo</h3><p id="modalBody">Operacion realizada.</p>
       <div class="actions"><button id="modalOK" class="btn" onclick="closeModal()">OK</button></div>
     </div>
   </div>
 
   <div id="qrModal" class="modal-bg qr-modal">
-    <div class="modal">
+    <div class="app-modal">
       <h3>Escanear Código QR</h3>
       <p>Apunta la cámara de tu dispositivo al código QR del caso.</p>
       <div id="qr-reader" style="width:100%;"></div>
