@@ -388,6 +388,12 @@
       transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
     }
     .case-card:hover{transform:translateY(-2px); box-shadow:var(--shadow)}
+    .case-card.selected{
+      border-color:rgba(14,124,102,.42);
+      border-left-color:var(--primary-strong);
+      background:linear-gradient(180deg, rgba(223,245,238,0.95), rgba(255,255,255,0.72));
+      box-shadow:0 18px 30px -24px rgba(14,124,102,.9);
+    }
     .case-card.urine-card{border-left-color:#c97a1b}
     body.dark-mode .hero{
       background:
@@ -399,6 +405,7 @@
     body.dark-mode .hero::after{opacity:.04;}
     body.dark-mode .case-card{background:linear-gradient(180deg, rgba(25,52,62,0.92), rgba(18,40,50,0.88)); border-color:var(--border-strong);}
     body.dark-mode .case-card:hover{background:linear-gradient(180deg, rgba(30,62,74,0.96), rgba(22,50,62,0.92));}
+    body.dark-mode .case-card.selected{background:linear-gradient(180deg, rgba(23,78,69,0.9), rgba(18,55,51,0.86)); border-color:rgba(100,209,178,.38);}
     body.dark-mode .summary{background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01)); border-color:var(--border-strong);}
     body.dark-mode #historyKPI .card{background:linear-gradient(145deg, rgba(25,52,62,0.9), rgba(14,35,44,0.8));}
     body.dark-mode .num-btn{background:var(--card); border-color:var(--border-strong);}
@@ -971,6 +978,11 @@
       <div class="card">
         <h2>Procesar Plasma/Suero</h2>
         <div class="search-row full"><input id="searchA" type="text" placeholder="Buscar caso... (Enter para limpiar)"></div>
+        <div class="cases-section">
+          <label>Casos pendientes (sangre)</label>
+          <div class="cases-grid" id="listA"></div>
+        </div>
+
         <div class="process-tray">
           <div><label>Selección (máx. 4)</label><div id="chipsA" class="summary">Ninguno.</div></div>
           <div class="divider"></div>
@@ -1002,10 +1014,6 @@
         </div>
         </div>
 
-        <div class="cases-section">
-          <label>Casos pendientes (sangre)</label>
-          <div class="cases-grid" id="listA"></div>
-        </div>
       </div>
     </section>
     
@@ -1316,7 +1324,8 @@
       const candidates = CASES.filter(c=>(STATUS[c.codigoCaso]||{}).pendingBlood && (!f || c.codigoCaso.toLowerCase().includes(f)));
       if (candidates.length === 0) { grid.innerHTML = '<p class="muted" style="padding: 16px;">No hay casos de sangre pendientes.</p>'; return; }
       candidates.forEach(c=>{
-        const card = document.createElement('div'); card.className = 'case-card'; card.dataset.code = c.codigoCaso;
+        const isSelected = chosenA.includes(c.codigoCaso);
+        const card = document.createElement('div'); card.className = `case-card${isSelected ? ' selected' : ''}`; card.dataset.code = c.codigoCaso;
         card.innerHTML = `<div class="case-card-info">
             <div class="case-card-kicker"><span class="sample-badge">Sangre</span></div>
             <span class="case-card-code">${c.codigoCaso}</span>
@@ -1324,7 +1333,7 @@
             <span class="case-card-tubes">Tubos: STL:${c.nTubosEDTA}, STR:${c.nTubosSERUM}</span>
         </div>
         <div class="case-card-actions">
-          <button type="button" class="case-card-action-btn case-card-add-btn addA" data-action="add" title="Agregar caso" aria-label="Agregar caso ${c.codigoCaso}">+</button>
+          <button type="button" class="case-card-action-btn case-card-add-btn addA" data-action="add" title="Agregar caso" aria-label="Agregar caso ${c.codigoCaso}">${isSelected ? '✓' : '+'}</button>
           <button type="button" class="case-card-action-btn case-card-discard-btn discardA" data-action="discard" title="Descartar sangre" aria-label="Descartar sangre del caso ${c.codigoCaso}"></button>
         </div>`;
         grid.appendChild(card);
@@ -1334,7 +1343,7 @@
       const item = e.target.closest('.case-card'); if(!item) return; const code = item.dataset.code;
       const actionBtn = e.target.closest('[data-action]');
       if(actionBtn?.dataset.action === 'discard') { discardBlood(code); return; }
-      if(actionBtn?.dataset.action === 'add' || !actionBtn) addA(code);
+      if(actionBtn?.dataset.action === 'add' || !actionBtn) { chosenA.includes(code) ? removeA(code) : addA(code); }
     });
     document.getElementById('searchA').addEventListener('input', debounce((ev)=>renderListA(ev.target.value), 250));
     document.getElementById('searchA').addEventListener('keydown',(ev)=>{ if(ev.key==='Enter'){ ev.target.value=''; renderListA(''); } });
@@ -1344,8 +1353,8 @@
         document.getElementById('aliquot-block-A').style.display = show ? 'block' : 'none';
         document.getElementById('e1g1-block-A').style.display = show ? 'block' : 'none';
     }
-    function addA(code){ if(!chosenA.includes(code)) chosenA.push(code); if(chosenA.length>4) chosenA.shift(); renderChipsA(); renderBlocksA(); updateSerumFlowUI(); }
-    function removeA(code){ chosenA = chosenA.filter(x=>x!==code); renderChipsA(); renderBlocksA(); updateSerumFlowUI(); }
+    function addA(code){ if(!chosenA.includes(code)) chosenA.push(code); if(chosenA.length>4) chosenA.shift(); renderChipsA(); renderBlocksA(); updateSerumFlowUI(); renderListA(document.getElementById('searchA').value); }
+    function removeA(code){ chosenA = chosenA.filter(x=>x!==code); renderChipsA(); renderBlocksA(); updateSerumFlowUI(); renderListA(document.getElementById('searchA').value); }
     
     function renderChipsA(){
       const box=document.getElementById('chipsA'); if(!chosenA.length){ box.textContent='Ninguno.'; return; }
