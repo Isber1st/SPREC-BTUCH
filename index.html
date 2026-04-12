@@ -424,6 +424,9 @@
     }
     .case-card-actions{display:flex; flex-direction:row; gap:8px; align-items:center; flex-shrink:0}
     .case-card-add-btn {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
       background: linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
       color: white;
       border: none;
@@ -435,6 +438,9 @@
     }
     .case-card-add-btn:hover{filter:saturate(1.05)}
     .case-card-discard-btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
       background:linear-gradient(135deg, var(--red) 0%, #9f2f24 100%);
       color:white;
       border:none;
@@ -444,6 +450,8 @@
       flex-shrink:0;
       box-shadow:0 16px 24px -20px rgba(192,57,43,.9);
     }
+    .case-card-add-btn svg,
+    .case-card-discard-btn svg{display:block; pointer-events:none}
     
     .divider{height:1px; background:linear-gradient(90deg, transparent, var(--border-strong), transparent); margin:24px 0}
     .grid-tubes{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px}
@@ -1267,16 +1275,17 @@
             <span class="case-card-tubes">Tubos: STL:${c.nTubosEDTA}, STR:${c.nTubosSERUM}</span>
         </div>
         <div class="case-card-actions">
-          <button class="case-card-add-btn addA" title="Agregar caso"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-          <button class="case-card-discard-btn discardA" title="Descartar sangre"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+          <button type="button" class="case-card-add-btn addA" data-action="add" title="Agregar caso" aria-label="Agregar caso ${c.codigoCaso}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+          <button type="button" class="case-card-discard-btn discardA" data-action="discard" title="Descartar sangre" aria-label="Descartar sangre del caso ${c.codigoCaso}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
         </div>`;
         grid.appendChild(card);
       });
     }
     document.getElementById('listA').addEventListener('click',(e)=>{
       const item = e.target.closest('.case-card'); if(!item) return; const code = item.dataset.code;
-      if(e.target.closest('.discardA')) { discardBlood(code); return; }
-      addA(code);
+      const actionBtn = e.target.closest('[data-action]');
+      if(actionBtn?.dataset.action === 'discard') { discardBlood(code); return; }
+      if(actionBtn?.dataset.action === 'add' || !actionBtn) addA(code);
     });
     document.getElementById('searchA').addEventListener('input', debounce((ev)=>renderListA(ev.target.value), 250));
     document.getElementById('searchA').addEventListener('keydown',(ev)=>{ if(ev.key==='Enter'){ ev.target.value=''; renderListA(''); } });
@@ -1373,14 +1382,15 @@
         if (candidates.length === 0) { grid.innerHTML = '<p class="muted" style="padding: 16px;">No hay casos de orina pendientes.</p>'; return; }
         candidates.forEach(c=>{
             const card = document.createElement('div'); card.className = 'case-card urine-card'; card.dataset.code = c.codigoCaso;
-            card.innerHTML = `<div class="case-card-info"><div class="case-card-kicker"><span class="sample-badge urine">Orina</span></div><span class="case-card-code">${c.codigoCaso}</span><span class="case-card-date">Coleccion: ${c.tColOrina0 || 'N/A'}</span><span class="case-card-tubes">Frascos: ${c.nTubosURINE}</span></div><div class="case-card-actions"><button class="case-card-add-btn addB" title="Agregar caso"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button><button class="case-card-discard-btn discardB" title="Descartar orina"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
+            card.innerHTML = `<div class="case-card-info"><div class="case-card-kicker"><span class="sample-badge urine">Orina</span></div><span class="case-card-code">${c.codigoCaso}</span><span class="case-card-date">Coleccion: ${c.tColOrina0 || 'N/A'}</span><span class="case-card-tubes">Frascos: ${c.nTubosURINE}</span></div><div class="case-card-actions"><button type="button" class="case-card-add-btn addB" data-action="add" title="Agregar caso" aria-label="Agregar caso ${c.codigoCaso}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button><button type="button" class="case-card-discard-btn discardB" data-action="discard" title="Descartar orina" aria-label="Descartar orina del caso ${c.codigoCaso}"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button></div>`;
             grid.appendChild(card);
         });
     }
     document.getElementById('listB').addEventListener('click',(e)=>{
       const item = e.target.closest('.case-card'); if(!item) return; const code = item.dataset.code;
-      if(e.target.closest('.discardB')) { discardUrine(code); return; }
-      addB(code);
+      const actionBtn = e.target.closest('[data-action]');
+      if(actionBtn?.dataset.action === 'discard') { discardUrine(code); return; }
+      if(actionBtn?.dataset.action === 'add' || !actionBtn) addB(code);
     });
     document.getElementById('searchB').addEventListener('input', debounce((ev)=>renderListB(ev.target.value), 250));
     document.getElementById('searchB').addEventListener('keydown',(ev)=>{ if(ev.key==='Enter'){ ev.target.value=''; renderListB(''); } });
