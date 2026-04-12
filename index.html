@@ -305,6 +305,10 @@
     }
     button svg {width:16px; height: 16px;}
     .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
       border:0;
       padding:12px 18px;
       background:linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%);
@@ -315,6 +319,10 @@
     .btn:hover, .btn-ghost:hover, .btn-danger:hover{transform:translateY(-1px)}
     .btn:disabled {opacity:0.6; cursor:not-allowed;}
     .btn-ghost{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
       background:rgba(255,255,255,0.45);
       color:var(--text);
       border:1px solid var(--border);
@@ -332,11 +340,18 @@
     }
     .btn-now svg{stroke-width:2.4}
     .btn-danger{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
       background:linear-gradient(135deg, var(--red) 0%, #9f2f24 100%);
       color:#fff;
       cursor:pointer;
       border:0;
     }
+    .btn svg,
+    .btn-ghost svg,
+    .btn-danger svg{flex:0 0 auto}
     .muted{color:var(--muted)} .error{color:#d92d20; font-weight:600}
     .info-msg {padding: 10px 12px; font-size: 0.875rem; margin-top: 6px; border-radius: 10px; background-color: var(--info-bg); border: 1px solid var(--info-border); color: var(--info-text);}
     .right{display:flex; justify-content:flex-end; gap:12px; flex-wrap:wrap}
@@ -857,7 +872,15 @@
         box-shadow:0 8px 22px -20px rgba(14,42,48,.45);
       }
       input,select,textarea{min-height:48px}
-      .time-control{grid-template-columns:1fr; max-width:none}
+      .time-control{
+        display:flex;
+        flex-direction:column;
+        align-items:stretch;
+        gap:8px;
+        width:100%;
+        max-width:none;
+      }
+      .time-control input{width:100%; min-width:0; max-width:100%}
       .btn, .btn-ghost { width:100%; min-height:48px; padding: 13px 16px; border-radius:12px; }
       .btn-now{width:100%; min-width:0}
       .right{
@@ -1015,7 +1038,7 @@
     }
 
     @media (max-width: 420px) {
-      .time-control{grid-template-columns:1fr}
+      .time-control{display:flex; flex-direction:column; align-items:stretch}
       .time-control .btn-now{width:100%; min-width:0}
     }
   </style>
