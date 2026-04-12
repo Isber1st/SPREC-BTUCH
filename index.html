@@ -280,11 +280,13 @@
     }
     .time-control{
       display:grid;
-      grid-template-columns:minmax(220px, 1fr) auto;
+      grid-template-columns:minmax(0, 1fr) max-content;
       gap:10px;
       align-items:center;
       max-width:680px;
     }
+    .time-control input{min-width:0}
+    .time-control .btn-now{width:auto; min-width:104px; white-space:nowrap}
     .input-with-icon { position: relative; display: flex; align-items: center; }
     .input-with-icon input { padding-right: 52px; }
     .input-icon-btn { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); padding: 8px; }
@@ -768,11 +770,11 @@
     body.dark-mode .selection-dock-chip{background:var(--primary-soft); color:var(--primary)}
     #blocksB:empty{display:none}
 
-    @media (min-width: 992px){
+    @media (min-width: 1200px){
       #t2a > .card,
       #t2b > .card{
         display:grid;
-        grid-template-columns:minmax(0, 1fr) minmax(330px, 420px);
+        grid-template-columns:minmax(0, 1fr) minmax(400px, 460px);
         gap:14px 18px;
         align-items:start;
       }
@@ -812,6 +814,20 @@
       .hero h1 { font-size: clamp(1.4rem, 3vw, 2.2rem); }
       .row { gap: 16px; }
       table { min-width: 600px; }
+    }
+
+    @media (max-width: 1199px) and (min-width: 769px) {
+      #t2a > .card,
+      #t2b > .card{display:block}
+      #t2a .process-tray,
+      #t2b .cases-section > div:nth-child(2),
+      #t2b #blocksB,
+      #t2b #g1-urine-block{position:static; margin-top:14px}
+      .process-tray{grid-template-columns:1fr 1fr}
+      .process-tray #aliquot-block-A,
+      .process-tray #e1g1-block-A,
+      .process-tray #blocksB,
+      .process-tray #g1-urine-block{grid-column:1 / -1}
     }
 
     @media (max-width: 768px) {
@@ -1021,6 +1037,11 @@
       }
       .modal{padding:18px; border-radius:22px}
     }
+
+    @media (max-width: 420px) {
+      .time-control{grid-template-columns:1fr}
+      .time-control .btn-now{width:100%; min-width:0}
+    }
   </style>
 </head>
 <body data-active-tab="t1">
@@ -1041,7 +1062,7 @@
   <nav class="tabs" aria-label="Navegacion principal">
     <button type="button" class="tab active" data-tab="t1" aria-current="page"><i class="bi bi-clipboard2-pulse"></i><span>Registro</span></button>
     <button type="button" class="tab" data-tab="t2a"><i class="bi bi-droplet-half"></i><span>Sangre</span></button>
-    <button type="button" class="tab" data-tab="t2b"><i class="bi bi-cup-hot"></i><span>Orina</span></button>
+    <button type="button" class="tab" data-tab="t2b"><i class="bi bi-prescription2"></i><span>Orina</span></button>
     <button type="button" class="tab" data-tab="t3"><i class="bi bi-clock-history"></i><span>Historial</span></button>
   </nav>
 
@@ -1654,7 +1675,7 @@
         candidates.forEach(c=>{
             const isSelected = chosenB.includes(c.codigoCaso);
             const card = document.createElement('div'); card.className = `case-card urine-card${isSelected ? ' selected' : ''}`; card.dataset.code = c.codigoCaso;
-            card.innerHTML = `<div class="case-card-info"><div class="case-card-kicker"><span class="sample-badge urine"><i class="bi bi-cup-hot"></i>Orina</span></div><span class="case-card-code">${c.codigoCaso}</span><div class="case-card-meta"><span><i class="bi bi-clock"></i>${c.tColOrina0 || 'N/A'}</span><span><i class="bi bi-capsule"></i>Frascos ${c.nTubosURINE}</span></div></div><div class="case-card-actions"><button type="button" class="case-card-action-btn case-card-add-btn addB" data-action="add" title="Agregar caso" aria-label="Agregar caso ${c.codigoCaso}"><i class="bi ${isSelected ? 'bi-check-lg' : 'bi-plus-lg'}"></i></button><button type="button" class="case-card-action-btn case-card-discard-btn discardB" data-action="discard" title="Descartar orina" aria-label="Descartar orina del caso ${c.codigoCaso}"><i class="bi bi-trash3"></i></button></div>`;
+            card.innerHTML = `<div class="case-card-info"><div class="case-card-kicker"><span class="sample-badge urine"><i class="bi bi-prescription2"></i>Orina</span></div><span class="case-card-code">${c.codigoCaso}</span><div class="case-card-meta"><span><i class="bi bi-clock"></i>${c.tColOrina0 || 'N/A'}</span><span><i class="bi bi-prescription2"></i>Frascos ${c.nTubosURINE}</span></div></div><div class="case-card-actions"><button type="button" class="case-card-action-btn case-card-add-btn addB" data-action="add" title="Agregar caso" aria-label="Agregar caso ${c.codigoCaso}"><i class="bi ${isSelected ? 'bi-check-lg' : 'bi-plus-lg'}"></i></button><button type="button" class="case-card-action-btn case-card-discard-btn discardB" data-action="discard" title="Descartar orina" aria-label="Descartar orina del caso ${c.codigoCaso}"><i class="bi bi-trash3"></i></button></div>`;
             grid.appendChild(card);
         });
     }
