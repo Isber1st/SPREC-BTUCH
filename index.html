@@ -6,6 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SPREC Fluidos – Biobanco U. de Chile</title>
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <style>
     :root {
       --bg: #eef3f1; --bg-accent: #dbe7e1; --card: rgba(255,255,255,0.92); --card-strong: #ffffff;
@@ -684,6 +686,126 @@
     .kind-blood td:first-child{box-shadow: inset 4px 0 0 var(--primary)}
     .kind-urine td:first-child{box-shadow: inset 4px 0 0 #c97a1b}
 
+    /* Operational UI refresh */
+    body{font-family:"Inter", "Segoe UI Variable", "Segoe UI", Arial, sans-serif; -webkit-font-smoothing:antialiased;}
+    main{max-width:1180px}
+    .hero h1{font-size:2.35rem; letter-spacing:0; line-height:1.04}
+    .card{border-radius:18px; padding:20px}
+    h2{font-size:1.45rem; letter-spacing:0; margin-bottom:14px}
+    h3,h4{letter-spacing:0}
+    label{letter-spacing:.03em}
+    input,select,textarea{border-radius:12px}
+    .tabs{padding-inline:24px}
+    .tab{display:inline-flex; align-items:center; justify-content:center; gap:8px}
+    .tab i{font-size:1rem; line-height:1}
+    .search-row{position:relative}
+    .search-row input{padding-left:40px}
+    .search-row::before{
+      content:"\F52A";
+      font-family:"bootstrap-icons";
+      position:absolute;
+      left:14px;
+      top:50%;
+      transform:translateY(-50%);
+      color:var(--muted);
+      z-index:1;
+      pointer-events:none;
+    }
+    .summary{padding:12px; border-radius:14px; min-height:48px}
+    .process-tray{
+      border-style:solid;
+      box-shadow:0 16px 30px -26px rgba(14,42,48,.5);
+    }
+    .cases-section{display:block}
+    .cases-section > label,
+    .cases-section > div > label{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:10px;
+    }
+    .cases-grid{gap:12px}
+    .case-card{
+      min-height:92px;
+      padding:13px 12px;
+      border-radius:16px;
+      gap:10px;
+    }
+    .case-card-code{font-size:1.08rem; letter-spacing:.02em}
+    .case-card-info{gap:5px}
+    .case-card-meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px 10px;
+      color:var(--muted);
+      font-size:.86rem;
+      line-height:1.25;
+    }
+    .case-card-meta span{display:inline-flex; align-items:center; gap:5px}
+    .case-card-tubes{font-size:.9rem}
+    .case-card-action-btn{width:40px; height:40px; font-size:1rem}
+    .case-card-action-btn i{line-height:1}
+    .case-card-add-btn{font-size:1.05rem}
+    .case-card-discard-btn::before,
+    .case-card-discard-btn::after{display:none}
+    .selection-dock[hidden]{display:none!important}
+    .selection-dock{display:none}
+    .selection-dock-chips{
+      display:flex;
+      gap:6px;
+      overflow:hidden;
+      min-width:0;
+    }
+    .selection-dock-chip{
+      padding:5px 8px;
+      border-radius:999px;
+      background:var(--primary-light);
+      color:var(--primary-strong);
+      font-size:.78rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    body.dark-mode .selection-dock-chip{background:var(--primary-soft); color:var(--primary)}
+    #blocksB:empty{display:none}
+
+    @media (min-width: 992px){
+      #t2a > .card,
+      #t2b > .card{
+        display:grid;
+        grid-template-columns:minmax(0, 1fr) minmax(330px, 420px);
+        gap:14px 18px;
+        align-items:start;
+      }
+      #t2a > .card > h2,
+      #t2b > .card > h2{grid-column:1 / -1; margin-bottom:0}
+      #t2a > .card > .search-row.full,
+      #t2b > .card > .search-row.full{grid-column:1; max-width:none; margin-bottom:0}
+      #t2a .cases-section{grid-column:1}
+      #t2a .process-tray{
+        grid-column:2;
+        grid-row:2 / span 2;
+        position:sticky;
+        top:86px;
+        max-height:calc(100vh - 112px);
+        overflow:auto;
+        margin-bottom:0;
+      }
+      #t2b .cases-section{display:contents}
+      #t2b .cases-section > div:first-child{grid-column:1; grid-row:3}
+      #t2b .cases-section > div:nth-child(2),
+      #t2b #blocksB,
+      #t2b #g1-urine-block{grid-column:2}
+      #t2b .cases-section > div:nth-child(2){
+        grid-row:2;
+        position:sticky;
+        top:86px;
+        margin-top:0;
+      }
+      #t2b #blocksB{grid-row:3}
+      #t2b #g1-urine-block{grid-row:4}
+      #t2b > .card > #blocksB:empty{display:none}
+    }
+
     @media (max-width: 1024px) and (min-width: 769px) {
       main { padding: 12px 16px 40px; }
       .hero { grid-template-columns: minmax(200px, 300px) 1fr; padding: 16px; }
@@ -696,7 +818,7 @@
       body {
         font-size: 16px;
         line-height: 1.5;
-        padding-bottom: calc(150px + env(safe-area-inset-bottom));
+        padding-bottom: calc(190px + env(safe-area-inset-bottom));
       }
       .row { grid-template-columns: 1fr; }
       header {padding: 10px 12px; gap:10px;}
@@ -770,11 +892,14 @@
         width:100%;
         padding:8px 6px;
         border-radius:14px;
-        font-size:.82rem;
+        font-size:.78rem;
         line-height:1.1;
         box-shadow:none;
         white-space:normal;
+        flex-direction:column;
+        gap:3px;
       }
+      .tab i{font-size:1.05rem}
       h2{font-size:1.35rem}
       .sample-type-selector{padding:8px; border-radius:16px}
       .sample-type-item{
@@ -815,6 +940,28 @@
       #t2b #g1-urine-block .right{position:static; margin:12px 0 0; padding:0; background:transparent; border:0; box-shadow:none; backdrop-filter:none}
       .case-card{align-items:flex-start; border-radius:18px; cursor:pointer; min-height:92px}
       .case-card-actions{padding-top:2px; flex-direction:row; align-self:flex-start;}
+      .selection-dock{
+        position:fixed;
+        left:10px;
+        right:10px;
+        bottom:calc(74px + env(safe-area-inset-bottom));
+        z-index:39;
+        display:grid;
+        grid-template-columns:auto minmax(0, 1fr) auto;
+        gap:8px;
+        align-items:center;
+        padding:10px;
+        border:1px solid var(--border);
+        border-radius:16px;
+        background:rgba(255,255,255,.94);
+        box-shadow:0 -18px 34px -26px rgba(14,42,48,.55);
+        backdrop-filter:blur(18px);
+      }
+      body.dark-mode .selection-dock{background:rgba(7,24,29,.94); border-color:var(--border-strong)}
+      .selection-dock-copy{display:flex; flex-direction:column; line-height:1.1}
+      .selection-dock-copy span{font-size:.68rem; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.04em}
+      .selection-dock-copy strong{font-size:.9rem}
+      .selection-dock-btn{min-height:40px; width:auto; padding:9px 10px; border-radius:12px; font-size:.82rem}
       .modal-bg{align-items:flex-end}
       .qr-modal .modal{
         width:100vw;
@@ -892,10 +1039,10 @@
   </header>
   
   <nav class="tabs" aria-label="Navegacion principal">
-    <button type="button" class="tab active" data-tab="t1" aria-current="page">Registro</button>
-    <button type="button" class="tab" data-tab="t2a">Sangre</button>
-    <button type="button" class="tab" data-tab="t2b">Orina</button>
-    <button type="button" class="tab" data-tab="t3">Historial</button>
+    <button type="button" class="tab active" data-tab="t1" aria-current="page"><i class="bi bi-clipboard2-pulse"></i><span>Registro</span></button>
+    <button type="button" class="tab" data-tab="t2a"><i class="bi bi-droplet-half"></i><span>Sangre</span></button>
+    <button type="button" class="tab" data-tab="t2b"><i class="bi bi-cup-hot"></i><span>Orina</span></button>
+    <button type="button" class="tab" data-tab="t3"><i class="bi bi-clock-history"></i><span>Historial</span></button>
   </nav>
 
   <main>
@@ -1100,6 +1247,15 @@
       </div>
     </section>
   </main>
+
+  <div id="selectionDock" class="selection-dock" hidden>
+    <div class="selection-dock-copy">
+      <span id="selectionDockTitle">Seleccion</span>
+      <strong id="selectionDockCount">0/4</strong>
+    </div>
+    <div id="selectionDockChips" class="selection-dock-chips"></div>
+    <button id="selectionDockAction" type="button" class="btn selection-dock-btn"><i class="bi bi-arrow-down-circle"></i>Procesar</button>
+  </div>
   
   <div id="modalBG" class="modal-bg" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalBody">
     <div class="modal">
@@ -1156,6 +1312,23 @@
         t=setTimeout(()=>fn.apply(null,args), wait); 
       }; 
     }
+    function updateSelectionDock(){
+      const dock = document.getElementById('selectionDock');
+      if(!dock) return;
+      const active = document.body.dataset.activeTab;
+      const isBlood = active === 't2a';
+      const isUrine = active === 't2b';
+      const selected = isBlood ? chosenA : (isUrine ? chosenB : []);
+      dock.hidden = !(isBlood || isUrine) || selected.length === 0;
+      if(dock.hidden) return;
+      document.getElementById('selectionDockTitle').textContent = isBlood ? 'Sangre' : 'Orina';
+      document.getElementById('selectionDockCount').textContent = `${selected.length}/4`;
+      document.getElementById('selectionDockChips').innerHTML = selected.map(code => `<span class="selection-dock-chip">${code}</span>`).join('');
+      document.getElementById('selectionDockAction').onclick = () => {
+        const target = document.querySelector(isBlood ? '#t2a .process-tray' : '#t2b .cases-section > div:nth-child(2)');
+        if(target) target.scrollIntoView({behavior:'smooth', block:'center'});
+      };
+    }
     function toggleButtonState(btn, isLoading, loadingText = 'Cargando...') {
       if (!btn) return;
       if (isLoading) {
@@ -1207,6 +1380,7 @@
         if(t.dataset.tab==='t3') loadHistory(); 
         if(t.dataset.tab==='t2a') loadPendingA(); 
         if(t.dataset.tab==='t2b') loadPendingB();
+        updateSelectionDock();
       });
     });
 
@@ -1366,14 +1540,13 @@
         const isSelected = chosenA.includes(c.codigoCaso);
         const card = document.createElement('div'); card.className = `case-card${isSelected ? ' selected' : ''}`; card.dataset.code = c.codigoCaso;
         card.innerHTML = `<div class="case-card-info">
-            <div class="case-card-kicker"><span class="sample-badge">Sangre</span></div>
+            <div class="case-card-kicker"><span class="sample-badge"><i class="bi bi-droplet-half"></i>Sangre</span></div>
             <span class="case-card-code">${c.codigoCaso}</span>
-            <span class="case-card-date">Coleccion: ${c.tColSangre || 'N/A'}</span>
-            <span class="case-card-tubes">Tubos: STL:${c.nTubosEDTA}, STR:${c.nTubosSERUM}</span>
+            <div class="case-card-meta"><span><i class="bi bi-clock"></i>${c.tColSangre || 'N/A'}</span><span><i class="bi bi-vial"></i>STL ${c.nTubosEDTA} / STR ${c.nTubosSERUM}</span></div>
         </div>
         <div class="case-card-actions">
-          <button type="button" class="case-card-action-btn case-card-add-btn addA" data-action="add" title="Agregar caso" aria-label="Agregar caso ${c.codigoCaso}">${isSelected ? '✓' : '+'}</button>
-          <button type="button" class="case-card-action-btn case-card-discard-btn discardA" data-action="discard" title="Descartar sangre" aria-label="Descartar sangre del caso ${c.codigoCaso}"></button>
+          <button type="button" class="case-card-action-btn case-card-add-btn addA" data-action="add" title="Agregar caso" aria-label="Agregar caso ${c.codigoCaso}"><i class="bi ${isSelected ? 'bi-check-lg' : 'bi-plus-lg'}"></i></button>
+          <button type="button" class="case-card-action-btn case-card-discard-btn discardA" data-action="discard" title="Descartar sangre" aria-label="Descartar sangre del caso ${c.codigoCaso}"><i class="bi bi-trash3"></i></button>
         </div>`;
         grid.appendChild(card);
       });
@@ -1396,9 +1569,10 @@
     function removeA(code){ chosenA = chosenA.filter(x=>x!==code); renderChipsA(); renderBlocksA(); updateSerumFlowUI(); renderListA(document.getElementById('searchA').value); }
     
     function renderChipsA(){
-      const box=document.getElementById('chipsA'); if(!chosenA.length){ box.textContent='Ninguno.'; return; }
+      const box=document.getElementById('chipsA'); if(!chosenA.length){ box.textContent='Ninguno.'; updateSelectionDock(); return; }
       box.innerHTML = chosenA.map(c=>`<span class="chip" data-code="${c}">${c}<button class="rmA" data-code="${c}" title="Quitar caso">&times;</button></span>`).join('');
       box.querySelectorAll('.rmA').forEach(btn=>{ btn.onclick = ()=> removeA(btn.dataset.code); });
+      updateSelectionDock();
     }
     
     function renderBlocksA(){
@@ -1480,7 +1654,7 @@
         candidates.forEach(c=>{
             const isSelected = chosenB.includes(c.codigoCaso);
             const card = document.createElement('div'); card.className = `case-card urine-card${isSelected ? ' selected' : ''}`; card.dataset.code = c.codigoCaso;
-            card.innerHTML = `<div class="case-card-info"><div class="case-card-kicker"><span class="sample-badge urine">Orina</span></div><span class="case-card-code">${c.codigoCaso}</span><span class="case-card-date">Coleccion: ${c.tColOrina0 || 'N/A'}</span><span class="case-card-tubes">Frascos: ${c.nTubosURINE}</span></div><div class="case-card-actions"><button type="button" class="case-card-action-btn case-card-add-btn addB" data-action="add" title="Agregar caso" aria-label="Agregar caso ${c.codigoCaso}">${isSelected ? '✓' : '+'}</button><button type="button" class="case-card-action-btn case-card-discard-btn discardB" data-action="discard" title="Descartar orina" aria-label="Descartar orina del caso ${c.codigoCaso}"></button></div>`;
+            card.innerHTML = `<div class="case-card-info"><div class="case-card-kicker"><span class="sample-badge urine"><i class="bi bi-cup-hot"></i>Orina</span></div><span class="case-card-code">${c.codigoCaso}</span><div class="case-card-meta"><span><i class="bi bi-clock"></i>${c.tColOrina0 || 'N/A'}</span><span><i class="bi bi-capsule"></i>Frascos ${c.nTubosURINE}</span></div></div><div class="case-card-actions"><button type="button" class="case-card-action-btn case-card-add-btn addB" data-action="add" title="Agregar caso" aria-label="Agregar caso ${c.codigoCaso}"><i class="bi ${isSelected ? 'bi-check-lg' : 'bi-plus-lg'}"></i></button><button type="button" class="case-card-action-btn case-card-discard-btn discardB" data-action="discard" title="Descartar orina" aria-label="Descartar orina del caso ${c.codigoCaso}"><i class="bi bi-trash3"></i></button></div>`;
             grid.appendChild(card);
         });
     }
@@ -1499,9 +1673,10 @@
     function addB(code){ if(!chosenB.includes(code)) chosenB.push(code); if(chosenB.length > 4) chosenB.shift(); renderChipsB(); renderBlocksB(); toggleG1UrineBlock(); renderListB(document.getElementById('searchB').value); }
     function removeB(code){ chosenB = chosenB.filter(x=>x!==code); renderChipsB(); renderBlocksB(); toggleG1UrineBlock(); renderListB(document.getElementById('searchB').value); }
     function renderChipsB(){
-        const box=document.getElementById('chipsB'); if(!chosenB.length){ box.textContent='Ninguno.'; return; }
+        const box=document.getElementById('chipsB'); if(!chosenB.length){ box.textContent='Ninguno.'; updateSelectionDock(); return; }
         box.innerHTML = chosenB.map(c=>`<span class="chip" data-code="${c}">${c}<button class="rmB" data-code="${c}" title="Quitar caso">&times;</button></span>`).join('');
         box.querySelectorAll('.rmB').forEach(btn=>{ btn.onclick = ()=> removeB(btn.dataset.code); });
+        updateSelectionDock();
     }
     function renderBlocksB(){
       const host=document.getElementById('blocksB'); host.innerHTML='';
